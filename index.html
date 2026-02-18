@@ -1,0 +1,288 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>選擇權投資入門指南 | 專業教學網</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+TC:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Noto Sans TC', sans-serif;
+            scroll-behavior: smooth;
+        }
+        .gradient-bg {
+            background: linear-gradient(135deg, #1e3a8a 0%, #3b82f6 100%);
+        }
+        .card-hover:hover {
+            transform: translateY(-5px);
+            transition: all 0.3s ease;
+        }
+        .strategy-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+        .chart-container {
+            background: #f8fafc;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            margin-top: 1rem;
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800">
+
+    <!-- Header & Navigation -->
+    <header class="fixed w-full z-50 bg-white/90 backdrop-blur-md shadow-sm">
+        <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 bg-blue-600 rounded flex items-center justify-center text-white font-bold">選</div>
+                <span class="text-xl font-bold tracking-tight">選擇權<span class="text-blue-600">教學網</span></span>
+            </div>
+            <nav class="hidden md:flex space-x-8 text-sm font-medium">
+                <a href="#definition" class="hover:text-blue-600 transition">什麼是選擇權</a>
+                <a href="#components" class="hover:text-blue-600 transition">重要術語</a>
+                <a href="#strategies" class="hover:text-blue-600 transition">四大策略</a>
+                <a href="#comparison" class="hover:text-blue-600 transition">買賣方對照</a>
+            </nav>
+            <button class="bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-blue-700 transition">
+                開始交易
+            </button>
+        </div>
+    </header>
+
+    <!-- Hero Section -->
+    <section class="pt-32 pb-20 gradient-bg text-white">
+        <div class="max-w-7xl mx-auto px-4 text-center">
+            <h1 class="text-4xl md:text-5xl font-bold mb-6">掌握選擇權，開啟投資新格局</h1>
+            <p class="text-lg md:text-xl opacity-90 max-w-2xl mx-auto mb-10">
+                選擇權不只是投機工具，它是最具彈性的風險規避與獲利倍增器。從零開始，帶你走進選擇權的世界。
+            </p>
+            <div class="flex flex-col md:flex-row justify-center space-y-4 md:space-y-0 md:space-x-4">
+                <a href="#strategies" class="bg-white text-blue-700 px-8 py-3 rounded-full font-bold shadow-lg hover:bg-opacity-90 transition text-center">立即探索四大策略</a>
+                <a href="#definition" class="border border-white/30 hover:bg-white/10 px-8 py-3 rounded-full font-bold transition text-center">觀看基礎定義</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Content Sections -->
+    <main class="max-w-7xl mx-auto px-4 py-16 space-y-24">
+
+        <!-- 1. Definition -->
+        <section id="definition" class="scroll-mt-24">
+            <div class="flex flex-col md:flex-row items-center gap-12">
+                <div class="md:w-1/2">
+                    <h2 class="text-3xl font-bold mb-6 flex items-center">
+                        <span class="w-2 h-8 bg-blue-600 mr-3"></span>什麼是選擇權？
+                    </h2>
+                    <p class="text-lg text-slate-600 leading-relaxed mb-6">
+                        選擇權（Options）是一種<strong>權利契約</strong>。買方支付一筆「權利金」給賣方，藉此取得在未來特定時間，以約定價格買入或賣出標的資產的「權利」。
+                    </p>
+                    <div class="grid grid-cols-2 gap-4">
+                        <div class="p-4 bg-blue-50 border-l-4 border-blue-500 rounded">
+                            <h4 class="font-bold text-blue-800">買方 (Holder)</h4>
+                            <p class="text-sm">擁有「執行權力」，但沒有義務。最大虧損為權利金。</p>
+                        </div>
+                        <div class="p-4 bg-amber-50 border-l-4 border-amber-500 rounded">
+                            <h4 class="font-bold text-amber-800">賣方 (Writer)</h4>
+                            <p class="text-sm">負擔「履行義務」，須繳保證金。利潤上限為權利金。</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="md:w-1/2 bg-white p-8 rounded-2xl shadow-xl border border-slate-100">
+                    <div class="text-center italic text-slate-500 mb-4">"選擇權就像是買保險"</div>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <span class="bg-green-100 text-green-600 rounded-full p-1 mr-3 mt-1">✓</span>
+                            <span>買方像保戶：支付保費，獲取保障。</span>
+                        </li>
+                        <li class="flex items-start">
+                            <span class="bg-green-100 text-green-600 rounded-full p-1 mr-3 mt-1">✓</span>
+                            <span>賣方像保險公司：收取保費，承擔風險。</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </section>
+
+        <!-- 2. Terminology -->
+        <section id="components" class="scroll-mt-24 bg-slate-100 -mx-4 px-4 py-16 rounded-3xl">
+            <div class="max-w-7xl mx-auto text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">掌握核心三要素</h2>
+                <p class="text-slate-600">在進入市場前，您必須看懂這些名詞</p>
+            </div>
+            <div class="grid md:grid-cols-3 gap-8">
+                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-blue-500">
+                    <div class="text-3xl mb-4">💰</div>
+                    <h3 class="text-xl font-bold mb-2">權利金 (Premium)</h3>
+                    <p class="text-slate-600 text-sm">買賣權利契約的價格。對買方來說是成本，對賣方來說是收入。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-indigo-500">
+                    <div class="text-3xl mb-4">🎯</div>
+                    <h3 class="text-xl font-bold mb-2">履約價 (Strike Price)</h3>
+                    <p class="text-slate-600 text-sm">契約中約定未來買進或賣出標的物的價格。這是判斷賺賠的基準。</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-sm border-t-4 border-purple-500">
+                    <div class="text-3xl mb-4">📅</div>
+                    <h3 class="text-xl font-bold mb-2">到期日 (Expiration)</h3>
+                    <p class="text-slate-600 text-sm">契約有效的最後期限。過了這天，選擇權若無執行價值將變廢紙。</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- 3. Four Basic Strategies -->
+        <section id="strategies" class="scroll-mt-24">
+            <div class="text-center mb-12">
+                <h2 class="text-3xl font-bold mb-4">選擇權四大基本策略</h2>
+                <p class="text-slate-600">根據您對市場的看法，選擇最適合的進場位置</p>
+            </div>
+
+            <div class="strategy-grid">
+                <!-- Buy Call -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs font-bold">強勢看漲</span>
+                        <h3 class="text-lg font-bold">買入買權 (Buy Call)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">支付小額權利金，博取標的大漲的無限獲利空間。</p>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 200 100" class="w-full h-32">
+                            <line x1="0" y1="80" x2="100" y2="80" stroke="#cbd5e1" stroke-width="2" />
+                            <line x1="100" y1="80" x2="180" y2="20" stroke="#ef4444" stroke-width="3" />
+                            <text x="5" y="70" font-size="10" fill="#94a3b8">成本</text>
+                            <text x="140" y="40" font-size="10" fill="#ef4444" font-weight="bold">無限獲利</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Sell Call -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">看跌或不漲</span>
+                        <h3 class="text-lg font-bold">賣出買權 (Sell Call)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">當標的不漲時，穩定賺取權利金，但承擔大漲風險。</p>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 200 100" class="w-full h-32">
+                            <line x1="0" y1="30" x2="100" y2="30" stroke="#10b981" stroke-width="3" />
+                            <line x1="100" y1="30" x2="180" y2="90" stroke="#cbd5e1" stroke-width="2" />
+                            <text x="5" y="25" font-size="10" fill="#10b981" font-weight="bold">固定收益</text>
+                            <text x="140" y="80" font-size="10" fill="#94a3b8">風險較大</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Buy Put -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-xs font-bold">強勢看跌</span>
+                        <h3 class="text-lg font-bold">買入賣權 (Buy Put)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">支付權利金，在標的大跌時獲利，如同為股票買保險。</p>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 200 100" class="w-full h-32">
+                            <line x1="20" y1="20" x2="100" y2="80" stroke="#3b82f6" stroke-width="3" />
+                            <line x1="100" y1="80" x2="200" y2="80" stroke="#cbd5e1" stroke-width="2" />
+                            <text x="25" y="40" font-size="10" fill="#3b82f6" font-weight="bold">跌越多賺越多</text>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Sell Put -->
+                <div class="bg-white p-6 rounded-xl shadow-md border border-slate-100 card-hover">
+                    <div class="flex justify-between items-start mb-4">
+                        <span class="bg-slate-100 text-slate-600 px-3 py-1 rounded-full text-xs font-bold">看漲或不跌</span>
+                        <h3 class="text-lg font-bold">賣出賣權 (Sell Put)</h3>
+                    </div>
+                    <p class="text-sm text-slate-500 mb-4">預期標的價格有撐，賺取權利金。若大跌則須負擔損失。</p>
+                    <div class="chart-container">
+                        <svg viewBox="0 0 200 100" class="w-full h-32">
+                            <line x1="20" y1="90" x2="100" y2="30" stroke="#cbd5e1" stroke-width="2" />
+                            <line x1="100" y1="30" x2="200" y2="30" stroke="#10b981" stroke-width="3" />
+                            <text x="120" y="25" font-size="10" fill="#10b981" font-weight="bold">固定收益</text>
+                        </svg>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- 4. Comparison Table -->
+        <section id="comparison" class="scroll-mt-24">
+            <h2 class="text-3xl font-bold mb-8 text-center">買方 vs 賣方：全面對照</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full border-collapse bg-white rounded-xl overflow-hidden shadow-lg">
+                    <thead>
+                        <tr class="bg-slate-800 text-white text-left">
+                            <th class="p-4">項目</th>
+                            <th class="p-4">買方 (Buyer)</th>
+                            <th class="p-4">賣方 (Seller)</th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-slate-100">
+                        <tr>
+                            <td class="p-4 font-bold bg-slate-50">主要權利/義務</td>
+                            <td class="p-4">享有執行契約的「權利」</td>
+                            <td class="p-4">負擔履行契約的「義務」</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold bg-slate-50">資金負擔</td>
+                            <td class="p-4">支付權利金（金額較小）</td>
+                            <td class="p-4">收取權利金，須繳保證金（金額較大）</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold bg-slate-50">利潤空間</td>
+                            <td class="p-4 text-green-600 font-bold">理論上無限</td>
+                            <td class="p-4 text-slate-800">侷限於收取的權利金</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold bg-slate-50">最大風險</td>
+                            <td class="p-4 text-slate-800">僅限於支付的權利金</td>
+                            <td class="p-4 text-red-600 font-bold">理論上無限</td>
+                        </tr>
+                        <tr>
+                            <td class="p-4 font-bold bg-slate-50">獲利勝率</td>
+                            <td class="p-4">較低（需看對方向且幅度夠大）</td>
+                            <td class="p-4 font-bold">較高（只要標的不動或沒超過損平點即獲利）</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <p class="mt-4 text-sm text-slate-400 text-center">* 以上獲利勝率僅為概算，實際交易受市場波動影響。</p>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="bg-slate-900 text-slate-400 py-12">
+        <div class="max-w-7xl mx-auto px-4 grid md:grid-cols-4 gap-8">
+            <div class="col-span-2">
+                <div class="flex items-center space-x-2 text-white mb-4">
+                    <div class="w-6 h-6 bg-blue-600 rounded flex items-center justify-center font-bold text-xs">選</div>
+                    <span class="text-lg font-bold">選擇權教學網</span>
+                </div>
+                <p class="text-sm max-w-sm">
+                    本教學網旨在提供基礎教育資訊，期貨與選擇權交易具備高度風險，投資人應評估自身經濟實力並審慎操作。
+                </p>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">快速連結</h4>
+                <ul class="space-y-2 text-sm">
+                    <li><a href="#" class="hover:text-white transition">新手常見QA</a></li>
+                    <li><a href="#" class="hover:text-white transition">交易成本計算</a></li>
+                    <li><a href="#" class="hover:text-white transition">風險控管須知</a></li>
+                </ul>
+            </div>
+            <div>
+                <h4 class="text-white font-bold mb-4">聯絡我們</h4>
+                <p class="text-sm">客服專線：0800-000-000</p>
+                <p class="text-sm">服務時間：交易日 08:00 - 17:00</p>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto px-4 mt-12 pt-8 border-t border-slate-800 text-center text-xs">
+            © 2024 選擇權教學網 投資一定有風險，選擇權投資有賺有賠，申購前應詳閱公開說明書。
+        </div>
+    </footer>
+
+</body>
+</html>
