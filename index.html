@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V5.7.0</title>
+    <title>歐大時間價值追蹤儀 - V5.7.2</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -18,6 +18,7 @@
         }
         /* 極細捲軸 */
         ::-webkit-scrollbar { width: 3px; height: 3px; }
+        ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         .version-badge {
@@ -29,36 +30,73 @@
             color: white;
         }
 
-        /* 增強按壓感的橘色浮水印按鈕 */
+        /* 按壓感橘色浮水印按鈕 */
         .session-btn {
-            @apply w-full px-1 py-1.5 rounded-lg text-[10px] font-black transition-all duration-75 border border-orange-200/40 bg-orange-50/20 text-orange-700/60 hover:bg-orange-100/60 flex items-center justify-center select-none;
+            width: 100%;
+            padding: 0.375rem 0.25rem;
+            border-radius: 0.5rem;
+            font-size: 10px;
+            font-weight: 900;
+            transition: all 75ms;
+            border: 1px solid rgba(251, 146, 60, 0.2);
+            background-color: rgba(255, 247, 237, 0.3);
+            color: rgba(194, 65, 12, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            user-select: none;
         }
-        .session-btn:active { @apply scale-90 shadow-inner bg-orange-200/50; }
+        .session-btn:active { transform: scale(0.9); box-shadow: inset 0 2px 4px 0 rgba(0, 0, 0, 0.06); }
         .session-btn.active {
-            @apply bg-orange-500 text-white border-orange-600 shadow-sm scale-105 z-10 opacity-100;
+            background-color: #f97316;
+            color: white;
+            border-color: #ea580c;
+            box-shadow: 0 4px 6px -1px rgba(249, 115, 22, 0.2);
+            transform: scale(1.05);
+            z-index: 10;
         }
-        .session-btn.night { @apply bg-slate-100/50 border-slate-200/50 text-slate-500; }
-        .session-btn.night.active { @apply bg-slate-800 text-white border-slate-900 shadow-slate-400; }
-
-        .stat-label-mini { @apply text-[9px] font-bold uppercase tracking-tighter opacity-50; }
-        .stat-value-mini { @apply text-[12px] font-black tracking-tighter; }
-        .stat-sum-highlight { @apply text-[14px] font-black text-orange-600 tracking-tighter; }
+        .session-btn.night { background-color: rgba(241, 245, 249, 0.5); border-color: rgba(203, 213, 225, 0.5); color: #64748b; }
+        .session-btn.night.active { background-color: #1e293b; color: white; border-color: #0f172a; }
 
         /* Modal 樣式 */
-        .modal-overlay { @apply fixed inset-0 z-[100] bg-slate-900/40 backdrop-blur-sm opacity-0 pointer-events-none transition-opacity duration-200 flex items-center justify-center p-2; }
-        .modal-overlay.active { @apply opacity-100 pointer-events-auto; }
-        .modal-container { @apply bg-white rounded-xl shadow-2xl w-full max-w-5xl overflow-hidden transform scale-95 transition-transform duration-200 border border-slate-200; }
-        .modal-overlay.active .modal-container { @apply scale-100; }
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            z-index: 100;
+            background-color: rgba(15, 23, 42, 0.5);
+            backdrop-filter: blur(4px);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0.5rem;
+        }
+        .modal-overlay.active { opacity: 1; pointer-events: auto; }
+        .modal-container {
+            background-color: white;
+            border-radius: 1rem;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            width: 100%;
+            max-width: 64rem; 
+            overflow: hidden;
+            transform: scale(0.95);
+            transition: transform 0.2s;
+            border: 1px solid #e2e8f0;
+        }
+        .modal-overlay.active .modal-container { transform: scale(1); }
 
-        .interactive-card { @apply cursor-pointer hover:border-orange-300 transition-all duration-75 select-none; }
-        .interactive-card:active { @apply scale-[0.97] bg-slate-50 shadow-inner; }
+        .interactive-card { cursor: pointer; transition: all 75ms; user-select: none; }
+        .interactive-card:hover { border-color: #fdba74; }
+        .interactive-card:active { transform: scale(0.97); background-color: #f8fafc; }
         
-        /* V5.6.7+ Excel 儲存格樣式 */
-        .excel-cell-ultra { @apply border border-slate-200 p-1 flex flex-col justify-center bg-white hover:bg-slate-50 transition-colors; }
-        .excel-row-main { @apply flex items-center justify-between; }
-        .excel-row-sub { @apply flex items-center justify-between mt-0.5 pt-0.5 border-t border-slate-50; }
-        .excel-font-lg { @apply text-[12px] font-black tracking-tight; }
-        .excel-font-sm { @apply text-[11px] font-bold font-mono tracking-tighter; }
+        .excel-cell-ultra { border: 1px solid #e2e8f0; padding: 0.25rem; display: flex; flex-direction: column; justify-content: center; background-color: white; transition: background-color 0.2s; }
+        .excel-row-main { display: flex; align-items: center; justify-content: space-between; }
+        .excel-row-sub { display: flex; align-items: center; justify-content: space-between; margin-top: 0.125rem; padding-top: 0.125rem; border-top: 1px solid #f1f5f9; }
+        .excel-font-lg { font-size: 12px; font-weight: 900; letter-spacing: -0.025em; }
+        .excel-font-sm { font-size: 11px; font-weight: 700; font-family: ui-monospace, monospace; letter-spacing: -0.05em; }
     </style>
 </head>
 <body class="p-2 md:p-4">
@@ -71,7 +109,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-base font-black tracking-tight text-slate-800 leading-none">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V5.7.0</span>
+                        <span class="version-badge">V5.7.2</span>
                     </div>
                 </div>
             </div>
@@ -79,9 +117,9 @@
             <div class="flex items-center gap-2">
                 <div id="status-tag" class="hidden sm:flex items-center gap-1.5 px-2 py-1 bg-slate-50 rounded text-[9px] font-bold border border-slate-200">
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                    <span id="data-count" class="text-slate-500 text-xs">同步中</span>
+                    <span id="data-count" class="text-slate-500">同步就緒</span>
                 </div>
-                <button id="refresh-btn" class="flex items-center gap-1.5 px-3 py-1 bg-orange-600 hover:bg-orange-700 active:scale-90 active:shadow-inner text-white rounded-md font-black text-[11px] shadow-sm transition-all duration-75">
+                <button id="refresh-btn" class="flex items-center gap-1.5 px-3 py-1 bg-orange-600 hover:bg-orange-700 active:scale-90 text-white rounded-md font-black text-[11px] shadow-sm transition-all duration-75">
                     <i data-lucide="refresh-ccw" class="w-3 h-3"></i> 同步
                 </button>
             </div>
@@ -140,26 +178,25 @@
             <div id="loading-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-sm transition-opacity duration-300">
                 <div class="flex flex-col items-center gap-2">
                     <div class="w-8 h-8 border-3 border-orange-600/20 border-t-orange-600 rounded-full animate-spin"></div>
-                    <p class="text-orange-600 font-bold text-[11px]">數據定位中</p>
+                    <p class="text-orange-600 font-bold text-[11px]">數據精確定位中</p>
                 </div>
             </div>
             <div id="main-chart"></div>
         </div>
 
-        <!-- V5.7.0 新增：常駐型波段掃描明細 (放在匯總表上面) -->
+        <!-- 常駐型波段掃描明細 -->
         <div id="on-page-scan-details" class="glass-card p-3 shadow-sm overflow-hidden bg-slate-50/30">
             <div class="flex items-center justify-between mb-2">
                 <div class="flex items-center gap-2">
                     <div class="p-1 bg-slate-800 rounded text-white"><i data-lucide="scan-line" class="w-3.5 h-3.5"></i></div>
-                    <h2 id="scan-details-title" class="text-[12px] font-black text-slate-700 uppercase tracking-tighter">當前時段波段明細掃描 (100pt)</h2>
+                    <h2 id="scan-details-title" class="text-[12px] font-black text-slate-700 uppercase tracking-tighter">當前波段掃描報表 (100pt)</h2>
                 </div>
                 <div id="scan-details-summary" class="flex gap-4 text-[10px] font-black">
                     <!-- JS 動態填入總和 -->
                 </div>
             </div>
             <div id="scan-details-grid" class="grid grid-cols-2 lg:grid-cols-4 gap-0.5">
-                <!-- JS 動態填入波段報表格 -->
-                <div class="col-span-full py-4 text-center text-slate-300 italic">請選擇時段以查看報表</div>
+                <div class="col-span-full py-4 text-center text-slate-300 italic font-medium">請選擇時段以查看報表</div>
             </div>
         </div>
 
@@ -188,21 +225,21 @@
         </div>
     </div>
 
-    <!-- Modal (保留給 50pt 或其他特定明細查看) -->
+    <!-- Modal -->
     <div id="detailed-modal" class="modal-overlay">
         <div class="modal-container">
-            <div class="px-4 py-2 border-b border-slate-200 flex items-center justify-between bg-white">
+            <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-sm">
                 <div class="flex items-center gap-2">
-                    <div id="modal-icon-bg" class="p-1 bg-orange-500 rounded text-white shadow-sm">
-                        <i id="modal-icon" data-lucide="file-text" class="w-3.5 h-3.5"></i>
+                    <div id="modal-icon-bg" class="p-1.5 bg-orange-500 rounded-lg text-white shadow-sm">
+                        <i id="modal-icon" data-lucide="file-text" class="w-4 h-4"></i>
                     </div>
-                    <h3 id="modal-title" class="text-[13px] font-black text-slate-800">詳細報表</h3>
+                    <h3 id="modal-title" class="text-sm font-black text-slate-800">詳細報表</h3>
                 </div>
-                <button id="btn-close-modal" class="p-1 hover:bg-slate-100 rounded transition-all">
+                <button id="btn-close-modal" class="p-1.5 hover:bg-slate-200 rounded transition-all">
                     <i data-lucide="x" class="w-4 h-4 text-slate-400"></i>
                 </button>
             </div>
-            <div id="modal-summary-bar" class="hidden bg-slate-900 px-4 py-2 flex items-center justify-between text-white shadow-inner border-b border-white/5"></div>
+            <div id="modal-summary-bar" class="hidden bg-slate-900 px-4 py-2 flex items-center justify-between text-white shadow-inner border-b border-white/5 font-black text-[11px]"></div>
             <div class="max-h-[70vh] overflow-y-auto p-1 bg-slate-100 custom-scrollbar" id="modal-content"></div>
             <div class="p-2 bg-white border-t border-slate-200 flex justify-end">
                 <button id="btn-modal-ok" class="px-6 py-1.5 bg-slate-800 hover:bg-slate-900 active:scale-95 text-white text-[10px] font-black rounded shadow-sm transition-all">關閉</button>
@@ -244,6 +281,7 @@
             return (isNaN(num) || num === 0) ? null : num;
         }
 
+        // V5.7.2 修復：修正 detectSwings 結尾檢查時 currentHigh 未定義的問題
         function detectSwings(prices, times, threshold) {
             let dataArr = [];
             for (let i = 0; i < prices.length; i++) if (prices[i] !== null) dataArr.push({ val: prices[i], time: times[i] });
@@ -273,8 +311,14 @@
                     }
                 }
             }
-            if (trend === 1 && curH.val > lastE.val + threshold) { upC++; let d = curH.val - lastE.val; upS += d; list.push({ type: '上漲', from: lastE, to: curH, diff: d }); }
-            else if (trend === -1 && curL.val < lastE.val - threshold) { downC++; let d = lastE.val - curL.val; downS += d; list.push({ type: '下跌', from: lastE, to: curL, diff: d }); }
+            // 修正：將 currentHigh 改為 curH，currentLow 改為 curL
+            if (trend === 1 && curH.val > lastE.val + threshold) { 
+                upC++; let d = curH.val - lastE.val; upS += d; 
+                list.push({ type: '上漲', from: lastE, to: curH, diff: d }); 
+            } else if (trend === -1 && curL.val < lastE.val - threshold) { 
+                downC++; let d = lastE.val - curL.val; downS += d; 
+                list.push({ type: '下跌', from: lastE, to: curL, diff: d }); 
+            }
             return { upCount: upC, upSum: upS, downCount: downC, downSum: downS, list };
         }
 
@@ -295,7 +339,6 @@
             return { s50: detectSwings(subY1, subTimes, 50), s100: detectSwings(subY1, subTimes, 100), wed: getDecay(subWed), fri: getDecay(subFri) };
         }
 
-        // V5.7.0 常駐報表渲染邏輯
         function renderOnPageDetails(idx) {
             if (idx === -1 || !globalData) return;
             const range = rowRanges[idx];
@@ -313,7 +356,7 @@
 
             grid.innerHTML = '';
             if (stats.s100.list.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-6 text-center text-slate-300 italic font-bold">該盤無 100pt 以上波動</div>';
+                grid.innerHTML = '<div class="col-span-full py-6 text-center text-slate-300 italic font-bold uppercase tracking-widest text-[11px]">此盤無 100pt 以上波動</div>';
             } else {
                 stats.s100.list.forEach((it, i) => {
                     const isUp = it.type === '上漲';
@@ -357,7 +400,6 @@
             fmt('spot-wed-val', 'spot-wed-pct', stats.wed); fmt('spot-fri-val', 'spot-fri-pct', stats.fri);
         }
 
-        // Modal 邏輯 (保留給特定點擊)
         function showDetailedModal(type) {
             if (currentSessionIdx === -1) return;
             const range = rowRanges[currentSessionIdx];
@@ -372,7 +414,7 @@
                 const swingData = type === '50pt' ? stats.s50 : stats.s100;
                 document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節`;
                 summaryBar.classList.remove('hidden');
-                summaryBar.innerHTML = `<div class="flex-1 text-xs font-black text-red-400">漲: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}</div><div class="flex-1 text-xs font-black text-emerald-400 pl-3">跌: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}</div><div class="flex-1 text-sm font-black text-orange-400 text-right">合: ${(swingData.upSum + swingData.downSum).toFixed(0)}</div>`;
+                summaryBar.innerHTML = `<div class="flex-1 text-red-400">漲: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}pt</div><div class="flex-1 text-emerald-400 pl-3">跌: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}pt</div><div class="flex-1 text-orange-400 text-right">合: ${(swingData.upSum + swingData.downSum).toFixed(0)} pt</div>`;
                 let html = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-0.5">`;
                 swingData.list.forEach((it, i) => {
                     const isUp = it.type === '上漲';
@@ -382,17 +424,18 @@
                 html += `</div>`; content.innerHTML = html;
             } else {
                 const isW = type === 'wed'; const d = isW ? stats.wed : stats.fri;
-                document.getElementById('modal-title').innerText = `${range.label} - ${isW?'週三':'週五'}選報表`;
-                if (d) content.innerHTML = `<div class="grid grid-cols-2 gap-1 p-1"><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">START</span><span class="text-lg font-black">${d.p3.toFixed(1)}</span></div><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">END</span><span class="text-lg font-black">${d.plast3.toFixed(1)}</span></div></div><div class="mx-1 bg-slate-900 rounded-lg p-5 text-center text-white shadow-xl mt-1"><p class="text-5xl font-black tracking-tighter">${d.d>0?'+':''}${d.d.toFixed(1)}</p><p class="text-lg font-black text-orange-400">${d.p.toFixed(2)}%</p></div>`;
+                document.getElementById('modal-title').innerText = `${range.label} - ${isW?'週三':'週五'}選詳細基準`;
+                if (d) content.innerHTML = `<div class="grid grid-cols-2 gap-1 p-1"><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">P3 START</span><span class="text-lg font-black text-slate-800">${d.p3.toFixed(1)}</span></div><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">PL3 END</span><span class="text-lg font-black text-slate-800">${d.plast3.toFixed(1)}</span></div></div><div class="mx-1 bg-slate-900 rounded-lg p-5 text-center text-white shadow-xl mt-1"><p class="text-5xl font-black tracking-tighter">${d.d>0?'+':''}${d.d.toFixed(1)}</p><p class="text-lg font-black text-orange-400 mt-1">${d.p.toFixed(2)}%</p></div>`;
             }
             overlay.classList.add('active');
+            if (typeof lucide !== 'undefined') lucide.createIcons();
         }
 
         function selectSession(idx) {
             currentSessionIdx = idx;
             document.querySelectorAll('.session-btn').forEach((btn, i) => btn.classList.toggle('active', i === idx));
             updateSpotlight(idx);
-            renderOnPageDetails(idx); // V5.7.0 常駐報表更新
+            renderOnPageDetails(idx);
             
             if (chart && idx !== -1) {
                 const r = rowRanges[idx]; const sIdx = r.start - 2; const eIdx = Math.min(r.end - 2, globalData.x.length - 1);
@@ -407,7 +450,7 @@
                     batch: [
                         { dataZoomIndex: 0, start: sX, end: eX },
                         { dataZoomIndex: 1, start: getPct(Math.min(...subY1)*0.996, gMinY1, gMaxY1), end: getPct(Math.max(...subY1)*1.004, gMinY1, gMaxY1) },
-                        { dataZoomIndex: 2, start: getPct(Math.min(...subY2)*0.94, gMinY2, gMaxY2), end: getPct(Math.max(...subY2)*1.06, gMinY2, gMaxY2) }
+                        { dataZoomIndex: 2, start: getPct(Math.min(...subY2)*0.92, gMinY2, gMaxY2), end: getPct(Math.max(...subY2)*1.08, gMinY2, gMaxY2) }
                     ]
                 });
             }
@@ -426,7 +469,7 @@
                     const fmtD = (d) => d ? `${d.p.toFixed(0)}%` : '--';
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-orange-50/30 border-b border-slate-50 transition-colors text-center";
-                    tr.innerHTML = `<td class="p-1 font-bold border-r text-slate-500 text-left pl-2">${range.label}</td><td class="p-1 text-red-500 font-bold">${stats.s50.upCount}/${stats.s50.upSum.toFixed(0)} <span class="text-emerald-500 font-normal ml-1">${stats.s50.downCount}/${stats.s50.downSum.toFixed(0)}</span></td><td class="p-1 text-red-600 font-black border-r">${stats.s100.upCount}/${stats.s100.upSum.toFixed(0)} <span class="text-emerald-600 ml-1">${stats.s100.downCount}/${stats.s100.downSum.toFixed(0)}</span></td><td class="p-1 ${stats.wed?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.wed)}</td><td class="p-1 ${stats.fri?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.fri)}</td>`;
+                    tr.innerHTML = `<td class="p-1 font-bold border-r text-slate-500 text-left pl-2">${range.label}</td><td class="p-1 text-red-500 font-bold">${stats.s50.upCount}/${stats.s50.upSum.toFixed(0)} <span class="text-emerald-500 font-normal ml-1">${stats.s50.downCount}/${stats.s50.downSum.toFixed(0)}</span></td><td class="p-1 text-red-600 font-black border-r">${stats.s100.upCount}/${stats.s100.upSum.toFixed(0)} <span class="text-emerald-600 font-black ml-1">${stats.s100.downCount}/${stats.s100.downSum.toFixed(0)}</span></td><td class="p-1 ${stats.wed?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.wed)}</td><td class="p-1 ${stats.fri?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.fri)}</td>`;
                     tbody.appendChild(tr);
                     markAreas.push([{ name: `${range.label}\n漲${stats.s100.upCount}跌${stats.s100.downCount}`, xAxis: data.x[start], itemStyle: { color: color }, label: { show: true, position: 'insideTopLeft', distance: 10, color: '#94a3b8', fontWeight: 'bold', fontSize: 8, lineHeight: 10, backgroundColor: 'rgba(255,255,255,0.7)', padding: [2, 4], borderRadius: 4, formatter: '{b}' } }, { xAxis: data.x[Math.min(range.end-2, data.x.length-1)] }]);
                 }
@@ -470,7 +513,9 @@
         }
 
         window.onload = () => {
-            lucide.createIcons(); fetchData();
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            fetchData();
+            
             document.getElementById('card-50pt').onclick = () => showDetailedModal('50pt');
             document.getElementById('card-100pt').onclick = () => showDetailedModal('100pt');
             document.getElementById('card-wed').onclick = () => showDetailedModal('wed');
