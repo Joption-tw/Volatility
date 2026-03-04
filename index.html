@@ -3,170 +3,209 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V4.7.0</title>
+    <title>歐大時間價值追蹤儀 - V5.2.1</title>
     <!-- 載入 Tailwind CSS 與 ECharts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <style>
         body { background-color: #f1f5f9; color: #1e293b; font-family: sans-serif; overflow-x: hidden; }
-        #main-chart { height: 750px; width: 100%; }
+        #main-chart { height: 550px; width: 100%; }
         .glass-card {
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(16px);
+            backdrop-filter: blur(12px);
             border: 1px solid rgba(226, 232, 240, 1);
-            border-radius: 1.5rem;
+            border-radius: 1rem;
         }
         /* 自定義捲軸 */
-        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
         ::-webkit-scrollbar-track { background: transparent; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 10px; }
         
         .version-badge {
-            background: linear-gradient(90deg, #2563eb, #7c3aed);
-            padding: 2px 10px;
-            border-radius: 6px;
-            font-size: 0.75rem;
+            background: linear-gradient(90deg, #f97316, #fb923c);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 0.65rem;
             font-weight: 900;
             color: white;
             text-transform: uppercase;
-            box-shadow: 0 4px 6px -1px rgba(37, 99, 235, 0.2);
         }
 
         .decay-table th { @apply bg-slate-50 text-slate-500 text-[10px] font-bold uppercase p-2 text-left border-b border-slate-100; }
         .decay-table td { @apply p-2 text-xs border-b border-slate-50 font-mono; }
-        .negative-value { color: #ef4444; font-weight: bold; }
-        .positive-value { color: #10b981; font-weight: bold; }
         
-        .up-accent { color: #ef4444; font-weight: 900; } 
-        .down-accent { color: #22c55e; font-weight: 900; }
+        /* 浮水印橘色按鈕 */
+        .session-btn {
+            @apply w-full px-1 py-2 rounded-lg text-[11px] font-black transition-all border border-orange-200/40 bg-orange-50/20 text-orange-700/60 hover:bg-orange-100/60 hover:text-orange-800 flex items-center justify-center;
+        }
+        .session-btn.active {
+            @apply bg-orange-500 text-white border-orange-600 shadow-md scale-105 z-10 opacity-100;
+        }
+        .session-btn.night { @apply bg-slate-200/30 border-slate-300/30 text-slate-500; }
+        .session-btn.night.active { @apply bg-slate-800 text-white border-slate-900; }
+
+        .stat-label { @apply text-[9px] font-bold uppercase tracking-tighter opacity-60; }
+        .stat-value-mini { @apply text-[13px] font-black tracking-tight; }
+        .stat-sum-mini { @apply text-[16px] font-black text-orange-600 tracking-tighter; }
         
-        .stat-label { @apply text-[10px] text-slate-400 font-bold uppercase tracking-wider; }
-        .stat-value { @apply text-base font-black text-slate-800; }
+        /* Logo 樣式優化 */
+        .logo-img {
+            width: 42px;
+            height: 42px;
+            object-fit: cover;
+            border-radius: 8px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
     </style>
 </head>
-<body class="p-4 md:p-8">
-    <div class="max-w-[1600px] mx-auto space-y-6">
-        <!-- Header -->
-        <header class="flex flex-col md:flex-row md:items-center justify-between gap-4 glass-card p-6 shadow-xl">
-            <div class="flex items-center gap-4">
-                <div class="bg-blue-600/10 p-3 rounded-xl ring-1 ring-blue-600/20">
-                    <i data-lucide="gauge" class="text-blue-600 w-8 h-8"></i>
+<body class="p-3 md:p-6">
+    <div class="max-w-[1600px] mx-auto space-y-4">
+        <!-- Header: V5.2.1 With Local Logo -->
+        <header class="flex items-center justify-between gap-4 glass-card px-5 py-2.5 shadow-sm text-slate-900">
+            <div class="flex items-center gap-3">
+                <div class="flex-shrink-0">
+                    <!-- 連結本地圖片 "IP標籤.jpg" -->
+                    <img src="IP標籤.jpg" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
+                    <!-- 如果圖片不存在時的後備圖示 -->
+                    <div class="hidden bg-orange-600/10 p-2 rounded-lg ring-1 ring-orange-500/20">
+                        <i data-lucide="layout-grid" class="text-orange-600 w-5 h-5"></i>
+                    </div>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2 mb-1">
-                        <h1 class="text-2xl font-black tracking-tighter text-slate-900">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V4.7.0</span>
+                    <div class="flex items-center gap-2">
+                        <h1 class="text-lg font-black tracking-tighter">歐大時間價值追蹤儀</h1>
+                        <span class="version-badge">V5.2.1</span>
                     </div>
-                    <p class="text-slate-500 text-xs font-mono uppercase tracking-widest opacity-80">Multi-Level Swing & Decay Analytics</p>
+                    <p class="text-slate-400 text-[9px] font-mono uppercase tracking-widest leading-none">Compact Data Analysis Interface</p>
                 </div>
             </div>
             
-            <div class="flex flex-wrap gap-3">
-                <div id="status-tag" class="flex items-center gap-2 px-4 py-2 bg-white rounded-lg text-xs font-mono border border-slate-200 shadow-sm">
-                    <span class="relative flex h-2 w-2">
+            <div class="flex items-center gap-3">
+                <div id="status-tag" class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-white rounded-lg text-[10px] font-mono border border-slate-200 shadow-xs">
+                    <span class="relative flex h-1.5 w-1.5">
                         <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        <span class="relative inline-flex rounded-full h-1.5 w-1.5 bg-emerald-500"></span>
                     </span>
-                    <span id="data-count" class="text-slate-600 font-bold">同步中...</span>
+                    <span id="data-count" class="text-slate-500">同步成功</span>
                 </div>
-                <button id="refresh-btn" class="flex items-center gap-2 px-6 py-2.5 bg-blue-600 hover:bg-blue-700 text-white rounded-xl transition-all active:scale-95 font-black shadow-lg shadow-blue-600/30">
-                    <i data-lucide="refresh-ccw" class="w-4 h-4"></i> 同步數據
+                <button id="refresh-btn" class="flex items-center gap-2 px-4 py-2 bg-orange-600 hover:bg-orange-700 text-white rounded-lg transition-all active:scale-95 font-black text-xs shadow-sm">
+                    <i data-lucide="refresh-ccw" class="w-3.5 h-3.5"></i> 同步
                 </button>
             </div>
         </header>
 
-        <!-- Dynamic Summary Panel -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <!-- 50pt Summary -->
-            <div class="glass-card p-5 border-l-4 border-l-blue-500 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="activity" class="w-12 h-12"></i></div>
-                <h3 class="text-sm font-black text-blue-600 mb-4 flex items-center gap-2">
-                    <i data-lucide="zap" class="w-4 h-4"></i> 50 點振幅分級統計
-                </h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <p class="stat-label">上漲累積</p>
-                        <p id="up-50-total" class="stat-value">-- 次 / -- 點</p>
+        <!-- Session Quick Switcher (Compact & Orange) -->
+        <div class="glass-card p-3 shadow-sm border-orange-100/50">
+            <div id="session-switcher" class="grid grid-cols-5 md:grid-cols-10 gap-1.5 w-full">
+                <!-- JS 動態產生按鈕 -->
+            </div>
+        </div>
+
+        <!-- Spotlight Analysis Panel: Super Compact Row -->
+        <div id="spotlight-panel" class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <!-- 50pt Stats -->
+            <div class="glass-card p-3 border-l-4 border-l-orange-400 shadow-sm bg-gradient-to-r from-white to-orange-50/10">
+                <div class="flex items-center gap-1.5 mb-2">
+                    <i data-lucide="activity" class="w-3 h-3 text-orange-500"></i>
+                    <span class="stat-label">50點振幅情況</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-700 mb-1 border-b border-orange-50 pb-1">
+                    <div class="flex-1 whitespace-nowrap">
+                        <span class="stat-label text-red-500 mr-1">漲:</span>
+                        <span id="spot-up-50" class="stat-value-mini text-red-500">--</span>
                     </div>
-                    <div>
-                        <p class="stat-label">下跌累積</p>
-                        <p id="down-50-total" class="stat-value">-- 次 / -- 點</p>
+                    <div class="w-px h-3 bg-slate-200"></div>
+                    <div class="flex-1 whitespace-nowrap text-right">
+                        <span class="stat-label text-emerald-600 mr-1">跌:</span>
+                        <span id="spot-down-50" class="stat-value-mini text-emerald-600">--</span>
                     </div>
-                    <div class="border-l border-slate-100 pl-4">
-                        <p class="stat-label text-blue-500">級別總和</p>
-                        <p id="sum-50-total" class="text-xl font-black text-blue-600 tracking-tighter">-- 點</p>
-                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="stat-label opacity-40">合計波幅</span>
+                    <span id="spot-sum-50" class="stat-sum-mini leading-none">--</span>
                 </div>
             </div>
 
-            <!-- 100pt Summary -->
-            <div class="glass-card p-5 border-l-4 border-l-purple-500 shadow-sm relative overflow-hidden">
-                <div class="absolute top-0 right-0 p-4 opacity-10"><i data-lucide="flame" class="w-12 h-12"></i></div>
-                <h3 class="text-sm font-black text-purple-600 mb-4 flex items-center gap-2">
-                    <i data-lucide="trending-up" class="w-4 h-4"></i> 100 點振幅分級統計
-                </h3>
-                <div class="grid grid-cols-3 gap-4">
-                    <div>
-                        <p class="stat-label">上漲累積</p>
-                        <p id="up-100-total" class="stat-value">-- 次 / -- 點</p>
+            <!-- 100pt Stats -->
+            <div class="glass-card p-3 border-l-4 border-l-orange-600 shadow-sm bg-gradient-to-r from-white to-orange-100/10">
+                <div class="flex items-center gap-1.5 mb-2">
+                    <i data-lucide="flame" class="w-3 h-3 text-orange-600"></i>
+                    <span class="stat-label">100點振幅情況</span>
+                </div>
+                <div class="flex items-center gap-2 text-slate-700 mb-1 border-b border-orange-50 pb-1">
+                    <div class="flex-1 whitespace-nowrap">
+                        <span class="stat-label text-red-500 mr-1">漲:</span>
+                        <span id="spot-up-100" class="stat-value-mini text-red-500">--</span>
                     </div>
-                    <div>
-                        <p class="stat-label">下跌累積</p>
-                        <p id="down-100-total" class="stat-value">-- 次 / -- 點</p>
+                    <div class="w-px h-3 bg-slate-200"></div>
+                    <div class="flex-1 whitespace-nowrap text-right">
+                        <span class="stat-label text-emerald-600 mr-1">跌:</span>
+                        <span id="spot-down-100" class="stat-value-mini text-emerald-600">--</span>
                     </div>
-                    <div class="border-l border-slate-100 pl-4">
-                        <p class="stat-label text-purple-500">級別總和</p>
-                        <p id="sum-100-total" class="text-xl font-black text-purple-600 tracking-tighter">-- 點</p>
-                    </div>
+                </div>
+                <div class="flex items-center justify-between">
+                    <span class="stat-label opacity-40">合計波幅</span>
+                    <span id="spot-sum-100" class="stat-sum-mini leading-none">--</span>
+                </div>
+            </div>
+
+            <!-- Wed Decay -->
+            <div class="glass-card p-3 border-l-4 border-l-sky-400 shadow-sm flex flex-col justify-center">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i data-lucide="calendar" class="w-3 h-3 text-sky-500"></i>
+                    <span class="stat-label">週三選價值變動</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span id="spot-wed-val" class="text-xl font-black tracking-tighter">--</span>
+                    <span id="spot-wed-pct" class="text-[10px] font-bold text-slate-400">--%</span>
+                </div>
+            </div>
+
+            <!-- Fri Decay -->
+            <div class="glass-card p-3 border-l-4 border-l-emerald-400 shadow-sm flex flex-col justify-center">
+                <div class="flex items-center gap-1.5 mb-1">
+                    <i data-lucide="calendar-days" class="w-3 h-3 text-emerald-500"></i>
+                    <span class="stat-label">週五選價值變動</span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                    <span id="spot-fri-val" class="text-xl font-black tracking-tighter">--</span>
+                    <span id="spot-fri-pct" class="text-[10px] font-bold text-slate-400">--%</span>
                 </div>
             </div>
         </div>
 
         <!-- Chart Area -->
-        <div class="glass-card p-4 md:p-6 shadow-xl relative overflow-hidden ring-1 ring-black/5">
-            <div id="loading-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-white/90 backdrop-blur-md transition-opacity duration-500">
-                <div class="flex flex-col items-center gap-4">
-                    <div class="w-14 h-14 border-4 border-blue-600/20 border-t-blue-600 rounded-full animate-spin"></div>
-                    <div class="text-center">
-                        <p class="text-blue-600 font-black tracking-tighter text-lg animate-pulse">正在運算級別振幅...</p>
-                        <p class="text-slate-500 text-xs mt-1 font-mono">Comparing 50pt & 100pt Swing Ranges</p>
-                    </div>
+        <div class="glass-card p-3 md:p-4 shadow-sm relative overflow-hidden ring-1 ring-black/5">
+            <div id="loading-overlay" class="absolute inset-0 z-50 flex items-center justify-center bg-white/80 backdrop-blur-sm transition-opacity duration-500">
+                <div class="flex flex-col items-center gap-3">
+                    <div class="w-10 h-10 border-4 border-orange-600/20 border-t-orange-600 rounded-full animate-spin"></div>
+                    <p class="text-orange-600 font-black text-sm animate-pulse">精確數據定位中</p>
                 </div>
             </div>
             <div id="main-chart"></div>
         </div>
 
-        <!-- Detailed Analysis -->
-        <div class="grid grid-cols-1 gap-6">
-            <div class="glass-card p-6 shadow-lg overflow-hidden">
-                <div class="flex items-center gap-3 mb-6">
-                    <div class="p-2 bg-indigo-50 rounded-lg text-indigo-600"><i data-lucide="table" class="w-5 h-5"></i></div>
-                    <h2 class="text-lg font-black text-slate-800 tracking-tight">多維度分級分析明細表</h2>
-                </div>
-                <div class="overflow-x-auto">
-                    <table class="w-full decay-table">
-                        <thead>
-                            <tr class="bg-slate-50/50">
-                                <th rowspan="2" class="border-r border-slate-100">時段</th>
-                                <th colspan="2" class="text-center border-b border-r border-slate-100 text-blue-600">50點振幅 (次/點)</th>
-                                <th colspan="2" class="text-center border-b border-r border-slate-100 text-purple-600">100點振幅 (次/點)</th>
-                                <th colspan="2" class="text-center border-b border-slate-100">時間價值耗損 (%)</th>
-                            </tr>
-                            <tr>
-                                <th class="text-red-500">上漲</th>
-                                <th class="text-green-600 border-r border-slate-100">下跌</th>
-                                <th class="text-red-500">上漲</th>
-                                <th class="text-green-600 border-r border-slate-100">下跌</th>
-                                <th>週三選</th>
-                                <th>週五選</th>
-                            </tr>
-                        </thead>
-                        <tbody id="decay-table-body">
-                            <tr><td colspan="7" class="text-center py-8 text-slate-400">數據計算中...</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+        <!-- Bottom Table: Minimal -->
+        <div class="glass-card p-4 shadow-sm overflow-hidden">
+            <div class="flex items-center gap-2 mb-3">
+                <div class="p-1.5 bg-orange-50 rounded text-orange-600"><i data-lucide="table-2" class="w-4 h-4"></i></div>
+                <h2 class="text-sm font-black text-slate-800 tracking-tight">各盤統計明細</h2>
+            </div>
+            <div class="overflow-x-auto">
+                <table class="w-full decay-table text-slate-900">
+                    <thead>
+                        <tr class="bg-slate-50/50 text-center">
+                            <th class="border-r">時段</th>
+                            <th colspan="2" class="border-r text-orange-600">50點 (次/點)</th>
+                            <th colspan="2" class="border-r text-orange-700">100點 (次/點)</th>
+                            <th colspan="2">價值耗損 (%)</th>
+                        </tr>
+                    </thead>
+                    <tbody id="decay-table-body">
+                        <tr><td colspan="7" class="text-center py-4 text-slate-400 italic">計算中...</td></tr>
+                    </tbody>
+                </table>
             </div>
         </div>
     </div>
@@ -174,6 +213,8 @@
     <script>
         const CSV_URL = 'https://docs.google.com/spreadsheets/d/1AsY4_MJipaMp_cNLpyeXTpFGnG0FD4vWJu-SDRdvtME/export?format=csv&gid=2119845045';
         let chart;
+        let globalData = null;
+        let currentSessionIdx = -1;
         
         const rowRanges = [
             { label: '周三晚', start: 2, end: 419, type: 'night' },
@@ -190,16 +231,14 @@
 
         function parseCSVLine(text) {
             const result = [];
-            let cur = "";
-            let inQuote = false;
+            let cur = ""; let inQuote = false;
             for (let i = 0; i < text.length; i++) {
                 const char = text[i];
                 if (char === '"') {
                     if (inQuote && text[i + 1] === '"') { cur += '"'; i++; }
                     else { inQuote = !inQuote; }
                 } else if (char === ',' && !inQuote) {
-                    result.push(cur.trim());
-                    cur = "";
+                    result.push(cur.trim()); cur = "";
                 } else { cur += char; }
             }
             result.push(cur.trim());
@@ -214,18 +253,11 @@
             return num;
         }
 
-        // 波段偵測
         function detectSwings(prices, threshold) {
             let validPrices = prices.filter(p => p !== null);
             if (validPrices.length < 2) return { upCount: 0, upSum: 0, downCount: 0, downSum: 0 };
-
-            let upCount = 0, upSum = 0;
-            let downCount = 0, downSum = 0;
-
-            let lastExtreme = validPrices[0];
-            let currentHigh = validPrices[0];
-            let currentLow = validPrices[0];
-            let trend = 0; 
+            let upCount = 0, upSum = 0, downCount = 0, downSum = 0;
+            let lastExtreme = validPrices[0], currentHigh = validPrices[0], currentLow = validPrices[0], trend = 0; 
 
             for (let i = 1; i < validPrices.length; i++) {
                 let p = validPrices[i];
@@ -248,101 +280,118 @@
             }
             if (trend === 1 && currentHigh > lastExtreme + threshold) { upCount++; upSum += (currentHigh - lastExtreme); }
             else if (trend === -1 && currentLow < lastExtreme - threshold) { downCount++; downSum += (lastExtreme - currentLow); }
-
             return { upCount, upSum, downCount, downSum };
         }
 
         function calculateStats(range, data) {
             const startIdx = range.start - 2;
             const endIdx = range.end - 2;
-            
-            const subsetY1 = [];
-            const subsetWed = [];
-            const subsetFri = [];
-
+            const subsetY1 = [], subsetWed = [], subsetFri = [];
             for (let i = startIdx; i <= endIdx; i++) {
                 if (data.y1[i] !== null) subsetY1.push(data.y1[i]);
                 if (data.y2a[i] !== null) subsetWed.push(data.y2a[i]);
                 if (data.y2b[i] !== null) subsetFri.push(data.y2b[i]);
             }
-
-            const swings50 = detectSwings(subsetY1, 50);
-            const swings100 = detectSwings(subsetY1, 100);
-
+            const s50 = detectSwings(subsetY1, 50);
+            const s100 = detectSwings(subsetY1, 100);
             const getDecay = (subset) => {
                 if (subset.length < 6) return null;
                 const d = subset[subset.length - 3] - subset[2];
                 const p = (d / subset[2]) * 100;
                 return { d, p };
             };
-
-            return { swings50, swings100, wed: getDecay(subsetWed), fri: getDecay(subsetFri) };
+            return { s50, s100, wed: getDecay(subsetWed), fri: getDecay(subsetFri) };
         }
 
-        function updateAnalytics(data) {
+        function updateSpotlight(index) {
+            if (index === -1 || !globalData) return;
+            const range = rowRanges[index];
+            const stats = calculateStats(range, globalData);
+
+            document.getElementById('spot-up-50').innerText = `${stats.s50.upCount}次/${stats.s50.upSum.toFixed(0)}點`;
+            document.getElementById('spot-down-50').innerText = `${stats.s50.downCount}次/${stats.s50.downSum.toFixed(0)}點`;
+            document.getElementById('spot-sum-50').innerText = `${(stats.s50.upSum + stats.s50.downSum).toFixed(0)} 點`;
+
+            document.getElementById('spot-up-100').innerText = `${stats.s100.upCount}次/${stats.s100.upSum.toFixed(0)}點`;
+            document.getElementById('spot-down-100').innerText = `${stats.s100.downCount}次/${stats.s100.downSum.toFixed(0)}點`;
+            document.getElementById('spot-sum-100').innerText = `${(stats.s100.upSum + stats.s100.downSum).toFixed(0)} 點`;
+
+            const formatVal = (id, pctId, decay) => {
+                const el = document.getElementById(id);
+                const pEl = document.getElementById(pctId);
+                if (!decay) { el.innerText = '--'; pEl.innerText = '--%'; return; }
+                const sym = decay.d > 0 ? '+' : '';
+                el.innerText = `${sym}${decay.d.toFixed(1)}`;
+                el.className = `text-xl font-black tracking-tighter ${decay.d < 0 ? 'text-red-500' : (decay.d > 0 ? 'text-emerald-500' : 'text-slate-800')}`;
+                pEl.innerText = `${sym}${decay.p.toFixed(1)}%`;
+            };
+            formatVal('spot-wed-val', 'spot-wed-pct', stats.wed);
+            formatVal('spot-fri-val', 'spot-fri-pct', stats.fri);
+        }
+
+        function selectSession(index) {
+            currentSessionIdx = index;
+            const buttons = document.querySelectorAll('.session-btn');
+            buttons.forEach((btn, i) => {
+                if (i === index) btn.classList.add('active');
+                else btn.classList.remove('active');
+            });
+            updateSpotlight(index);
+            if (chart && index !== -1) {
+                const range = rowRanges[index];
+                const startPercent = ( (range.start - 2) / globalData.x.length ) * 100;
+                const endPercent = ( (range.end - 2) / globalData.x.length ) * 100;
+                chart.dispatchAction({ type: 'dataZoom', start: startPercent, end: endPercent });
+            }
+        }
+
+        function createSwitcher() {
+            const container = document.getElementById('session-switcher');
+            container.innerHTML = '';
+            rowRanges.forEach((range, i) => {
+                const btn = document.createElement('button');
+                btn.className = `session-btn ${range.type === 'night' ? 'night' : ''}`;
+                btn.innerText = range.label;
+                btn.onclick = () => selectSession(i);
+                container.appendChild(btn);
+            });
+        }
+
+        function updateTableAndMarks(data) {
             const tbody = document.getElementById('decay-table-body');
             tbody.innerHTML = '';
-            
-            let totals = {
-                up50C: 0, up50S: 0, down50C: 0, down50S: 0,
-                up100C: 0, up100S: 0, down100C: 0, down100S: 0
-            };
-
             const markData = [];
-            const nightColors = ['rgba(226, 232, 240, 0.7)', 'rgba(203, 213, 225, 0.7)', 'rgba(148, 163, 184, 0.5)', 'rgba(100, 116, 139, 0.5)', 'rgba(71, 85, 105, 0.4)'];
-            const dayColors = ['rgba(255, 255, 255, 1)', 'rgba(248, 250, 252, 1)', 'rgba(255, 255, 255, 1)', 'rgba(248, 250, 252, 1)', 'rgba(255, 255, 255, 1)'];
-            let nightIdx = 0; let dayIdx = 0;
+            const nightColors = ['rgba(255, 237, 213, 0.7)', 'rgba(255, 247, 237, 0.7)', 'rgba(254, 215, 170, 0.5)', 'rgba(253, 186, 116, 0.5)', 'rgba(251, 146, 60, 0.4)'];
+            const dayColors = ['rgba(255, 255, 255, 1)', 'rgba(255, 251, 235, 1)', 'rgba(255, 255, 255, 1)', 'rgba(255, 251, 235, 1)', 'rgba(255, 255, 255, 1)'];
+            let nI = 0, dI = 0;
 
-            rowRanges.forEach((range) => {
+            rowRanges.forEach((range, i) => {
                 const startIdx = range.start - 2;
-                const endIdx = range.end - 2;
-                
                 if (startIdx >= 0 && startIdx < data.x.length) {
                     const stats = calculateStats(range, data);
-                    const safeEndIdx = Math.min(endIdx, data.x.length - 1);
-                    const color = range.type === 'night' ? nightColors[nightIdx++ % nightColors.length] : dayColors[dayIdx++ % dayColors.length];
-
-                    totals.up50C += stats.swings50.upCount; totals.up50S += stats.swings50.upSum;
-                    totals.down50C += stats.swings50.downCount; totals.down50S += stats.swings50.downSum;
-                    totals.up100C += stats.swings100.upCount; totals.up100S += stats.swings100.upSum;
-                    totals.down100C += stats.swings100.downCount; totals.down100S += stats.swings100.downSum;
-
+                    const color = range.type === 'night' ? nightColors[nI++ % 5] : dayColors[dI++ % 5];
                     const formatD = (d) => d ? `${d.d > 0 ? '+' : ''}${d.d.toFixed(1)} (${d.p > 0 ? '+' : ''}${d.p.toFixed(0)}%)` : '--';
 
                     const tr = document.createElement('tr');
                     tr.innerHTML = `
-                        <td class="font-bold text-slate-700 border-r border-slate-100">${range.label}</td>
-                        <td class="text-red-500">${stats.swings50.upCount}次/${stats.swings50.upSum.toFixed(0)}點</td>
-                        <td class="text-green-600 border-r border-slate-100">${stats.swings50.downCount}次/${stats.swings50.downSum.toFixed(0)}點</td>
-                        <td class="text-red-500 font-bold">${stats.swings100.upCount}次/${stats.swings100.upSum.toFixed(0)}點</td>
-                        <td class="text-green-600 font-bold border-r border-slate-100">${stats.swings100.downCount}次/${stats.swings100.downSum.toFixed(0)}點</td>
-                        <td class="${stats.wed && stats.wed.d < 0 ? 'negative-value' : ''}">${formatD(stats.wed)}</td>
-                        <td class="${stats.fri && stats.fri.d < 0 ? 'negative-value' : ''}">${formatD(stats.fri)}</td>
+                        <td class="font-bold text-slate-700 border-r">${range.label}</td>
+                        <td class="text-red-500 font-bold">${stats.s50.upCount}次/${stats.s50.upSum.toFixed(0)}點</td>
+                        <td class="text-green-600 border-r font-bold">${stats.s50.downCount}次/${stats.s50.downSum.toFixed(0)}點</td>
+                        <td class="text-red-600 font-black">${stats.s100.upCount}次/${stats.s100.upSum.toFixed(0)}點</td>
+                        <td class="text-green-600 font-black border-r">${stats.s100.downCount}次/${stats.s100.downSum.toFixed(0)}點</td>
+                        <td class="${stats.wed && stats.wed.d < 0 ? 'text-red-500 font-black' : ''}">${formatD(stats.wed)}</td>
+                        <td class="${stats.fri && stats.fri.d < 0 ? 'text-red-500 font-black' : ''}">${formatD(stats.fri)}</td>
                     `;
                     tbody.appendChild(tr);
 
-                    const finalLabel = `${range.label}\n100漲:${stats.swings100.upCount}次跌:${stats.swings100.downCount}次\n三:${formatD(stats.wed)}\n五:${formatD(stats.fri)}`;
-
+                    const finalLabel = `${range.label}\n100漲:${stats.s100.upCount} 跌:${stats.s100.downCount}\n三:${formatD(stats.wed)}\n五:${formatD(stats.fri)}`;
                     markData.push([{
                         name: finalLabel, xAxis: data.x[startIdx], itemStyle: { color: color },
-                        label: { 
-                            show: true, position: 'insideTopLeft', distance: 10, color: '#334155', fontWeight: 'bold', fontSize: 9, lineHeight: 12,
-                            backgroundColor: 'rgba(255,255,255,0.85)', padding: [4, 8], borderRadius: 4, borderWidth: 1, borderColor: 'rgba(0,0,0,0.05)',
-                            formatter: '{b}'
-                        }
-                    }, { xAxis: data.x[safeEndIdx] }]);
+                        label: { show: true, position: 'insideTopLeft', distance: 10, color: '#431407', fontWeight: 'bold', fontSize: 9, lineHeight: 11,
+                        backgroundColor: 'rgba(255,255,255,0.85)', padding: [4, 8], borderRadius: 4, borderWidth: 1, borderColor: 'rgba(249,115,22,0.1)', formatter: '{b}' }
+                    }, { xAxis: data.x[Math.min(range.end - 2, data.x.length - 1)] }]);
                 }
             });
-
-            // 更新頂部數據卡
-            document.getElementById('up-50-total').innerText = `${totals.up50C} 次 / ${totals.up50S.toFixed(0)} 點`;
-            document.getElementById('down-50-total').innerText = `${totals.down50C} 次 / ${totals.down50S.toFixed(0)} 點`;
-            document.getElementById('sum-50-total').innerText = `${(totals.up50S + totals.down50S).toFixed(0)} 點`;
-
-            document.getElementById('up-100-total').innerText = `${totals.up100C} 次 / ${totals.up100S.toFixed(0)} 點`;
-            document.getElementById('down-100-total').innerText = `${totals.down100C} 次 / ${totals.down100S.toFixed(0)} 點`;
-            document.getElementById('sum-100-total').innerText = `${(totals.up100S + totals.down100S).toFixed(0)} 點`;
-
             return markData;
         }
 
@@ -350,44 +399,29 @@
             const chartDom = document.getElementById('main-chart');
             if (chart) chart.dispose();
             chart = echarts.init(chartDom, null, { renderer: 'canvas' });
-
-            const markAreas = updateAnalytics(data);
-
+            const markAreas = updateTableAndMarks(data);
             const option = {
                 backgroundColor: '#ffffff',
-                tooltip: {
-                    trigger: 'axis',
-                    backgroundColor: 'rgba(255, 255, 255, 0.98)',
-                    borderColor: '#cbd5e1',
-                    textStyle: { color: '#1e293b' },
-                    axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } }
-                },
-                legend: {
-                    data: ['期貨指數', '週三選', '週五選'],
-                    top: 10,
-                    textStyle: { color: '#334155', fontWeight: '900', fontSize: 14 }
-                },
-                grid: { top: '12%', left: '85', right: '85', bottom: '90', containLabel: true },
+                tooltip: { trigger: 'axis', backgroundColor: 'rgba(255, 255, 255, 0.98)', borderColor: '#cbd5e1', textStyle: { color: '#1e293b' }, axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } } },
+                legend: { data: ['期貨指數', '週三選', '週五選'], top: 5, textStyle: { color: '#334155', fontWeight: '900', fontSize: 13 } },
+                grid: { top: '10%', left: '70', right: '70', bottom: '80', containLabel: true },
                 dataZoom: [
-                    { type: 'slider', xAxisIndex: [0], start: 0, end: 100, bottom: 30, height: 35, fillerColor: 'rgba(37, 99, 235, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#2563eb' } },
-                    { type: 'slider', yAxisIndex: [0], left: '10', start: 0, end: 100, width: 22, fillerColor: 'rgba(37, 99, 235, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#2563eb' } },
-                    { type: 'slider', yAxisIndex: [1], right: '10', start: 0, end: 100, width: 22, fillerColor: 'rgba(5, 150, 105, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#059669' } },
+                    { type: 'slider', xAxisIndex: [0], start: 0, end: 100, bottom: 20, height: 30, fillerColor: 'rgba(249, 115, 22, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#f97316' } },
+                    { type: 'slider', yAxisIndex: [0], left: '5', start: 0, end: 100, width: 15, fillerColor: 'rgba(249, 115, 22, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#f97316' } },
+                    { type: 'slider', yAxisIndex: [1], right: '5', start: 0, end: 100, width: 15, fillerColor: 'rgba(249, 115, 22, 0.1)', borderColor: '#e2e8f0', handleStyle: { color: '#f97316' } },
                     { type: 'inside', xAxisIndex: [0] }
                 ],
-                xAxis: { type: 'category', data: data.x, boundaryGap: false, axisLine: { lineStyle: { color: '#94a3b8' } }, axisLabel: { color: '#64748b', fontSize: 11 } },
+                xAxis: { type: 'category', data: data.x, boundaryGap: false, axisLine: { lineStyle: { color: '#94a3b8' } }, axisLabel: { color: '#64748b', fontSize: 10 } },
                 yAxis: [
-                    { type: 'value', name: '期貨指數', scale: true, boundaryGap: ['20%', '20%'], axisLine: { show: true, lineStyle: { color: '#2563eb' } }, axisLabel: { color: '#2563eb', fontWeight: 'bold', formatter: (v) => v.toLocaleString() }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
-                    { type: 'value', name: '選擇權', position: 'right', scale: true, boundaryGap: ['20%', '20%'], axisLine: { show: true, lineStyle: { color: '#059669' } }, axisLabel: { color: '#059669', fontWeight: 'bold', formatter: (v) => v.toLocaleString() }, splitLine: { show: false } }
+                    { type: 'value', name: '期指', scale: true, boundaryGap: ['15%', '15%'], axisLine: { show: true, lineStyle: { color: '#f97316' } }, axisLabel: { color: '#c2410c', fontWeight: 'bold', formatter: (v) => v.toLocaleString(), fontSize: 10 }, splitLine: { lineStyle: { color: '#f1f5f9' } } },
+                    { type: 'value', name: '選擇權', position: 'right', scale: true, boundaryGap: ['15%', '15%'], axisLine: { show: true, lineStyle: { color: '#f97316' } }, axisLabel: { color: '#c2410c', fontWeight: 'bold', formatter: (v) => v.toLocaleString(), fontSize: 10 }, splitLine: { show: false } }
                 ],
                 series: [
-                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 4, color: '#2563eb' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(37, 99, 235, 0.2)' }, { offset: 1, color: 'rgba(37, 99, 235, 0)' }]) }, 
-                      markArea: { silent: true, data: markAreas } 
-                    },
-                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 3, color: '#059669' } },
+                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 3, color: '#2563eb' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(37, 99, 235, 0.15)' }, { offset: 1, color: 'rgba(37, 99, 235, 0)' }]) }, markArea: { silent: true, data: markAreas } },
+                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 2, color: '#059669' } },
                     { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 2, color: '#d97706', type: 'dashed' } }
                 ]
             };
-
             chart.setOption(option);
         }
 
@@ -402,14 +436,16 @@
                 for (let i = 1; i < lines.length; i++) {
                     const cols = parseCSVLine(lines[i]);
                     if (cols.length >= 4) {
-                        data.x.push(cols[0]); 
-                        data.y1.push(cleanNumeric(cols[1]));
-                        data.y2a.push(cleanNumeric(cols[2]));
-                        data.y2b.push(cleanNumeric(cols[3]));
+                        data.x.push(cols[0]); data.y1.push(cleanNumeric(cols[1]));
+                        data.y2a.push(cleanNumeric(cols[2])); data.y2b.push(cleanNumeric(cols[3]));
                     }
                 }
-                initChart(data);
-                document.getElementById('data-count').innerText = `同步成功 (${data.x.length} 筆)`;
+                globalData = data;
+                initChart(data); createSwitcher();
+                let lastValid = rowRanges.length - 1;
+                while(lastValid >= 0 && (rowRanges[lastValid].start - 2) >= data.x.length) lastValid--;
+                if(lastValid >= 0) selectSession(lastValid);
+                document.getElementById('data-count').innerText = `已載入 ${data.x.length} 筆`;
             } catch (error) {
                 console.error('Fetch error:', error);
                 document.getElementById('data-count').innerText = '連線失敗';
