@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V5.2.1</title>
+    <title>歐大時間價值追蹤儀 - V5.3.0</title>
     <!-- 載入 Tailwind CSS 與 ECharts -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -49,7 +49,6 @@
         .stat-value-mini { @apply text-[13px] font-black tracking-tight; }
         .stat-sum-mini { @apply text-[16px] font-black text-orange-600 tracking-tighter; }
         
-        /* Logo 樣式優化 */
         .logo-img {
             width: 42px;
             height: 42px;
@@ -61,13 +60,11 @@
 </head>
 <body class="p-3 md:p-6">
     <div class="max-w-[1600px] mx-auto space-y-4">
-        <!-- Header: V5.2.1 With Local Logo -->
+        <!-- Header -->
         <header class="flex items-center justify-between gap-4 glass-card px-5 py-2.5 shadow-sm text-slate-900">
             <div class="flex items-center gap-3">
                 <div class="flex-shrink-0">
-                    <!-- 連結本地圖片 "IP標籤.jpg" -->
                     <img src="IP標籤.jpg" alt="Logo" class="logo-img" onerror="this.style.display='none'; this.nextElementSibling.style.display='block';">
-                    <!-- 如果圖片不存在時的後備圖示 -->
                     <div class="hidden bg-orange-600/10 p-2 rounded-lg ring-1 ring-orange-500/20">
                         <i data-lucide="layout-grid" class="text-orange-600 w-5 h-5"></i>
                     </div>
@@ -75,9 +72,9 @@
                 <div>
                     <div class="flex items-center gap-2">
                         <h1 class="text-lg font-black tracking-tighter">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V5.2.1</span>
+                        <span class="version-badge">V5.3.0</span>
                     </div>
-                    <p class="text-slate-400 text-[9px] font-mono uppercase tracking-widest leading-none">Compact Data Analysis Interface</p>
+                    <p class="text-slate-400 text-[9px] font-mono uppercase tracking-widest leading-none">Multi-Axis Precise Synchronization</p>
                 </div>
             </div>
             
@@ -95,14 +92,14 @@
             </div>
         </header>
 
-        <!-- Session Quick Switcher (Compact & Orange) -->
+        <!-- Session Quick Switcher -->
         <div class="glass-card p-3 shadow-sm border-orange-100/50">
             <div id="session-switcher" class="grid grid-cols-5 md:grid-cols-10 gap-1.5 w-full">
                 <!-- JS 動態產生按鈕 -->
             </div>
         </div>
 
-        <!-- Spotlight Analysis Panel: Super Compact Row -->
+        <!-- Spotlight Analysis Panel -->
         <div id="spotlight-panel" class="grid grid-cols-1 md:grid-cols-4 gap-3">
             <!-- 50pt Stats -->
             <div class="glass-card p-3 border-l-4 border-l-orange-400 shadow-sm bg-gradient-to-r from-white to-orange-50/10">
@@ -186,7 +183,7 @@
             <div id="main-chart"></div>
         </div>
 
-        <!-- Bottom Table: Minimal -->
+        <!-- Bottom Table -->
         <div class="glass-card p-4 shadow-sm overflow-hidden">
             <div class="flex items-center gap-2 mb-3">
                 <div class="p-1.5 bg-orange-50 rounded text-orange-600"><i data-lucide="table-2" class="w-4 h-4"></i></div>
@@ -329,6 +326,7 @@
             formatVal('spot-fri-val', 'spot-fri-pct', stats.fri);
         }
 
+        // V5.3.0 核心更新：同步 X, Y1, Y2 三軸定位
         function selectSession(index) {
             currentSessionIdx = index;
             const buttons = document.querySelectorAll('.session-btn');
@@ -336,12 +334,52 @@
                 if (i === index) btn.classList.add('active');
                 else btn.classList.remove('active');
             });
+
             updateSpotlight(index);
+
             if (chart && index !== -1) {
                 const range = rowRanges[index];
-                const startPercent = ( (range.start - 2) / globalData.x.length ) * 100;
-                const endPercent = ( (range.end - 2) / globalData.x.length ) * 100;
-                chart.dispatchAction({ type: 'dataZoom', start: startPercent, end: endPercent });
+                const startIdx = range.start - 2;
+                const endIdx = Math.min(range.end - 2, globalData.x.length - 1);
+
+                // 1. X 軸百分比
+                const startX = (startIdx / globalData.x.length) * 100;
+                const endX = (endIdx / globalData.x.length) * 100;
+
+                // 2. 計算 Y1 (期貨) 與 Y2 (選擇權) 的局部範圍
+                const subY1 = globalData.y1.slice(startIdx, endIdx + 1).filter(v => v !== null);
+                const subY2a = globalData.y2a.slice(startIdx, endIdx + 1).filter(v => v !== null);
+                const subY2b = globalData.y2b.slice(startIdx, endIdx + 1).filter(v => v !== null);
+                const subY2 = [...subY2a, ...subY2b];
+
+                // 抓取全域範圍
+                const allY1 = globalData.y1.filter(v => v !== null);
+                const allY2 = [...globalData.y2a, ...globalData.y2b].filter(v => v !== null);
+                
+                const gMinY1 = Math.min(...allY1), gMaxY1 = Math.max(...allY1);
+                const gMinY2 = Math.min(...allY2), gMaxY2 = Math.max(...allY2);
+
+                const getPercent = (val, min, max) => Math.max(0, Math.min(100, ((val - min) / (max - min)) * 100));
+
+                // 同步 DataZoom 行動
+                chart.dispatchAction({
+                    type: 'dataZoom',
+                    batch: [
+                        { // X Axis
+                            dataZoomIndex: 0, start: startX, end: endX 
+                        },
+                        { // Y1 Axis (Left)
+                            dataZoomIndex: 1, 
+                            start: getPercent(Math.min(...subY1) * 0.99, gMinY1, gMaxY1),
+                            end: getPercent(Math.max(...subY1) * 1.01, gMinY1, gMaxY1)
+                        },
+                        { // Y2 Axis (Right)
+                            dataZoomIndex: 2,
+                            start: getPercent(Math.min(...subY2) * 0.95, gMinY2, gMaxY2),
+                            end: getPercent(Math.max(...subY2) * 1.05, gMinY2, gMaxY2)
+                        }
+                    ]
+                });
             }
         }
 
@@ -400,6 +438,18 @@
             if (chart) chart.dispose();
             chart = echarts.init(chartDom, null, { renderer: 'canvas' });
             const markAreas = updateTableAndMarks(data);
+
+            // V5.3.0 關鍵點位標註設定
+            const markExtrema = {
+                symbol: 'pin',
+                symbolSize: 35,
+                label: { show: true, fontSize: 10, fontWeight: 'bold' },
+                data: [
+                    { type: 'max', name: '最高', itemStyle: { color: '#ef4444' } },
+                    { type: 'min', name: '最低', itemStyle: { color: '#3b82f6' } }
+                ]
+            };
+
             const option = {
                 backgroundColor: '#ffffff',
                 tooltip: { trigger: 'axis', backgroundColor: 'rgba(255, 255, 255, 0.98)', borderColor: '#cbd5e1', textStyle: { color: '#1e293b' }, axisPointer: { type: 'cross', label: { backgroundColor: '#475569' } } },
@@ -417,9 +467,23 @@
                     { type: 'value', name: '選擇權', position: 'right', scale: true, boundaryGap: ['15%', '15%'], axisLine: { show: true, lineStyle: { color: '#f97316' } }, axisLabel: { color: '#c2410c', fontWeight: 'bold', formatter: (v) => v.toLocaleString(), fontSize: 10 }, splitLine: { show: false } }
                 ],
                 series: [
-                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 3, color: '#2563eb' }, areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(37, 99, 235, 0.15)' }, { offset: 1, color: 'rgba(37, 99, 235, 0)' }]) }, markArea: { silent: true, data: markAreas } },
-                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 2, color: '#059669' } },
-                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, connectNulls: false, lineStyle: { width: 2, color: '#d97706', type: 'dashed' } }
+                    { 
+                        name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, connectNulls: false, 
+                        lineStyle: { width: 3, color: '#2563eb' }, 
+                        areaStyle: { color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [{ offset: 0, color: 'rgba(37, 99, 235, 0.15)' }, { offset: 1, color: 'rgba(37, 99, 235, 0)' }]) }, 
+                        markArea: { silent: true, data: markAreas },
+                        markPoint: markExtrema 
+                    },
+                    { 
+                        name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, connectNulls: false, 
+                        lineStyle: { width: 2, color: '#059669' },
+                        markPoint: markExtrema 
+                    },
+                    { 
+                        name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, connectNulls: false, 
+                        lineStyle: { width: 2, color: '#d97706', type: 'dashed' },
+                        markPoint: markExtrema 
+                    }
                 ]
             };
             chart.setOption(option);
