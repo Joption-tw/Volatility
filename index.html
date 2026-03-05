@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V5.7.2</title>
+    <title>歐大時間價值追蹤儀 - V5.8.1</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -28,6 +28,7 @@
             font-size: 0.6rem;
             font-weight: 900;
             color: white;
+            text-transform: uppercase;
         }
 
         /* 按壓感橘色浮水印按鈕 */
@@ -80,7 +81,7 @@
             border-radius: 1rem;
             box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
             width: 100%;
-            max-width: 64rem; 
+            max-width: 72rem; 
             overflow: hidden;
             transform: scale(0.95);
             transition: transform 0.2s;
@@ -92,10 +93,13 @@
         .interactive-card:hover { border-color: #fdba74; }
         .interactive-card:active { transform: scale(0.97); background-color: #f8fafc; }
         
-        .excel-cell-ultra { border: 1px solid #e2e8f0; padding: 0.25rem; display: flex; flex-direction: column; justify-content: center; background-color: white; transition: background-color 0.2s; }
+        /* Excel 儲存格加強版 */
+        .excel-cell-ultra { border: 1px solid #e2e8f0; padding: 0.25rem 0.4rem; display: flex; flex-direction: column; justify-content: center; background-color: white; transition: background-color 0.2s; }
         .excel-row-main { display: flex; align-items: center; justify-content: space-between; }
-        .excel-row-sub { display: flex; align-items: center; justify-content: space-between; margin-top: 0.125rem; padding-top: 0.125rem; border-top: 1px solid #f1f5f9; }
-        .excel-font-lg { font-size: 12px; font-weight: 900; letter-spacing: -0.025em; }
+        .excel-row-sub { display: flex; align-items: center; justify-content: space-between; margin-top: 1px; padding-top: 1px; border-top: 1px solid #f1f5f9; }
+        .excel-row-val { display: flex; align-items: center; gap: 3px; margin-top: 1px; font-size: 9px; font-weight: 800; border-top: 1px dashed #f1f5f9; white-space: nowrap; }
+        
+        .excel-font-lg { font-size: 13px; font-weight: 900; letter-spacing: -0.025em; }
         .excel-font-sm { font-size: 11px; font-weight: 700; font-family: ui-monospace, monospace; letter-spacing: -0.05em; }
     </style>
 </head>
@@ -108,8 +112,8 @@
                 <div class="hidden bg-orange-500/10 p-1.5 rounded-md"><i data-lucide="layout" class="text-orange-600 w-4 h-4"></i></div>
                 <div>
                     <div class="flex items-center gap-1.5">
-                        <h1 class="text-base font-black tracking-tight text-slate-800 leading-none">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V5.7.2</span>
+                        <h1 class="text-base font-black text-slate-800 leading-none">歐大時間價值追蹤儀</h1>
+                        <span class="version-badge">V5.8.1</span>
                     </div>
                 </div>
             </div>
@@ -135,18 +139,18 @@
         <!-- Spotlight Panel -->
         <div id="spotlight-panel" class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div id="card-50pt" class="glass-card p-2.5 border-l-4 border-l-orange-400 interactive-card flex flex-col justify-center">
-                <p class="stat-label-mini text-orange-500 mb-1 flex items-center gap-1"><i data-lucide="activity" class="w-2.5 h-2.5"></i> 50點波段 (漲/跌/合)</p>
+                <p class="stat-label-mini text-orange-500 mb-1 flex items-center gap-1 text-[9px] font-bold uppercase"><i data-lucide="activity" class="w-2.5 h-2.5"></i> 50點波段 (漲/跌/合)</p>
                 <div class="flex items-baseline justify-between">
                     <span id="spot-up-50" class="stat-value-mini text-red-500 font-bold">--</span>
                     <span class="text-slate-300 mx-1 text-[10px]">|</span>
                     <span id="spot-down-50" class="stat-value-mini text-emerald-600 font-bold">--</span>
                     <span class="text-slate-300 mx-1 text-[10px]">|</span>
-                    <span id="spot-sum-50" class="stat-sum-highlight">--</span>
+                    <span id="spot-sum-50" class="stat-sum-highlight text-orange-500">--</span>
                 </div>
             </div>
 
             <div id="card-100pt" class="glass-card p-2.5 border-l-4 border-l-orange-600 interactive-card flex flex-col justify-center">
-                <p class="stat-label-mini text-orange-700 mb-1 flex items-center gap-1"><i data-lucide="flame" class="w-2.5 h-2.5"></i> 100點波段 (漲/跌/合)</p>
+                <p class="stat-label-mini text-orange-700 mb-1 flex items-center gap-1 text-[9px] font-bold uppercase"><i data-lucide="flame" class="w-2.5 h-2.5"></i> 100點波段 (漲/跌/合)</p>
                 <div class="flex items-baseline justify-between">
                     <span id="spot-up-100" class="stat-value-mini text-red-500 font-black">--</span>
                     <span class="text-slate-300 mx-1 text-[10px]">|</span>
@@ -158,7 +162,7 @@
 
             <div id="card-wed" class="glass-card p-2.5 border-l-4 border-l-sky-500 interactive-card flex items-center justify-between">
                 <div class="flex flex-col">
-                    <p class="stat-label-mini text-sky-600 mb-0.5 uppercase">週三選耗損</p>
+                    <p class="stat-label-mini text-sky-600 mb-0.5 text-[9px] font-bold uppercase">週三選耗損</p>
                     <span id="spot-wed-val" class="text-[18px] font-black tracking-tighter leading-none text-slate-800">--</span>
                 </div>
                 <span id="spot-wed-pct" class="text-[11px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
@@ -166,7 +170,7 @@
 
             <div id="card-fri" class="glass-card p-2.5 border-l-4 border-l-emerald-500 interactive-card flex items-center justify-between">
                 <div class="flex flex-col">
-                    <p class="stat-label-mini text-emerald-600 mb-0.5 uppercase">週五選耗損</p>
+                    <p class="stat-label-mini text-emerald-600 mb-0.5 text-[9px] font-bold uppercase">週五選耗損</p>
                     <span id="spot-fri-val" class="text-[18px] font-black tracking-tighter leading-none text-slate-800">--</span>
                 </div>
                 <span id="spot-fri-pct" class="text-[11px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
@@ -230,7 +234,7 @@
         <div class="modal-container">
             <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-sm">
                 <div class="flex items-center gap-2">
-                    <div id="modal-icon-bg" class="p-1.5 bg-orange-500 rounded-lg text-white shadow-sm">
+                    <div id="modal-icon-bg" class="p-1 bg-orange-500 rounded-lg text-white shadow-sm">
                         <i id="modal-icon" data-lucide="file-text" class="w-4 h-4"></i>
                     </div>
                     <h3 id="modal-title" class="text-sm font-black text-slate-800">詳細報表</h3>
@@ -281,14 +285,25 @@
             return (isNaN(num) || num === 0) ? null : num;
         }
 
-        // V5.7.2 修復：修正 detectSwings 結尾檢查時 currentHigh 未定義的問題
-        function detectSwings(prices, times, threshold) {
+        function detectSwingsWithOption(prices, times, weds, fris, threshold) {
             let dataArr = [];
-            for (let i = 0; i < prices.length; i++) if (prices[i] !== null) dataArr.push({ val: prices[i], time: times[i] });
+            for (let i = 0; i < prices.length; i++) {
+                if (prices[i] !== null) {
+                    dataArr.push({ val: prices[i], time: times[i], wed: weds[i], fri: fris[i] });
+                }
+            }
             if (dataArr.length < 2) return { upCount: 0, upSum: 0, downCount: 0, downSum: 0, list: [] };
             
             let upC = 0, upS = 0, downC = 0, downS = 0, list = [];
             let lastE = dataArr[0], curH = dataArr[0], curL = dataArr[0], trend = 0; 
+
+            const pushSwing = (type, start, end) => {
+                let diff = Math.abs(end.val - start.val);
+                let wDiff = end.wed !== null && start.wed !== null ? (end.wed - start.wed) : null;
+                let fDiff = end.fri !== null && start.fri !== null ? (end.fri - start.fri) : null;
+                list.push({ type, from: start, to: end, diff, wedDiff: wDiff, friDiff: fDiff });
+                if (type === '上漲') { upC++; upS += diff; } else { downC++; downS += diff; }
+            };
 
             for (let i = 1; i < dataArr.length; i++) {
                 let p = dataArr[i];
@@ -298,45 +313,72 @@
                 } else if (trend === 1) {
                     if (p.val > curH.val) curH = p;
                     else if (p.val <= curH.val - threshold) {
-                        upC++; let d = curH.val - lastE.val; upS += d;
-                        list.push({ type: '上漲', from: lastE, to: curH, diff: d });
+                        pushSwing('上漲', lastE, curH);
                         trend = -1; lastE = curH; curL = p;
                     }
                 } else if (trend === -1) {
                     if (p.val < curL.val) curL = p;
                     else if (p.val >= curL.val + threshold) {
-                        downC++; let d = lastE.val - curL.val; downS += d;
-                        list.push({ type: '下跌', from: lastE, to: curL, diff: d });
+                        pushSwing('下跌', lastE, curL);
                         trend = 1; lastE = curL; curH = p;
                     }
                 }
             }
-            // 修正：將 currentHigh 改為 curH，currentLow 改為 curL
-            if (trend === 1 && curH.val > lastE.val + threshold) { 
-                upC++; let d = curH.val - lastE.val; upS += d; 
-                list.push({ type: '上漲', from: lastE, to: curH, diff: d }); 
-            } else if (trend === -1 && curL.val < lastE.val - threshold) { 
-                downC++; let d = lastE.val - curL.val; downS += d; 
-                list.push({ type: '下跌', from: lastE, to: curL, diff: d }); 
-            }
-            return { upCount: upC, upSum: upS, downCount: downC, downSum: downS, list };
-        }
+            if (trend === 1 && curH.val > lastE.val + threshold) pushSwing('上漲', lastE, curH);
+            else if (trend === -1 && curL.val < lastE.val - threshold) pushSwing('下跌', lastE, curL);
 
-        function getDecay(sub) {
-            const f = sub.filter(v => v !== null);
-            if (f.length < 6) return null;
-            const d = f[f.length - 3] - f[2];
-            return { d, p: (d / f[2]) * 100, p3: f[2], plast3: f[f.length-3] };
+            return { upCount: upC, upSum: upS, downCount: downC, downSum: downS, list };
         }
 
         function calculateStats(range, data) {
             const start = range.start - 2; const end = range.end - 2;
-            const subY1 = [], subTimes = [], subWed = [], subFri = [];
+            const subY1 = [], subT = [], subW = [], subF = [];
             for (let i = start; i <= end; i++) {
-                subY1.push(data.y1[i]); subTimes.push(data.x[i]);
-                subWed.push(data.y2a[i]); subFri.push(data.y2b[i]);
+                subY1.push(data.y1[i]); subT.push(data.x[i]);
+                subW.push(data.y2a[i]); subF.push(data.y2b[i]);
             }
-            return { s50: detectSwings(subY1, subTimes, 50), s100: detectSwings(subY1, subTimes, 100), wed: getDecay(subWed), fri: getDecay(subFri) };
+            const getDecay = (sub) => {
+                const f = sub.filter(v => v !== null);
+                if (f.length < 6) return null;
+                const d = f[f.length - 3] - f[2];
+                return { d, p: (d / f[2]) * 100, p3: f[2], plast3: f[f.length-3] };
+            };
+            return { 
+                s50: detectSwingsWithOption(subY1, subT, subW, subF, 50), 
+                s100: detectSwingsWithOption(subY1, subT, subW, subF, 100), 
+                wed: getDecay(subW), 
+                fri: getDecay(subF) 
+            };
+        }
+
+        // V5.8.1 修改：更新文字為「時間價值變化:」
+        function createExcelCellHtml(it, i) {
+            const isUp = it.type === '上漲';
+            const t = it.from.time.split(' ')[1] || it.from.time;
+            const formatOpt = (val) => {
+                if (val === null) return '--';
+                const cls = val < 0 ? 'text-emerald-600' : (val > 0 ? 'text-red-500' : 'text-slate-400');
+                return `<span class="${cls}">${val > 0 ? '+' : ''}${val.toFixed(1)}</span>`;
+            };
+            return `
+                <div class="excel-cell-ultra shadow-xs border-l-4 ${isUp ? 'border-l-red-500' : 'border-l-emerald-500'}">
+                    <div class="excel-row-main">
+                        <div class="flex items-center gap-1">
+                            <span class="excel-font-lg text-slate-400">#${i+1}</span>
+                            <span class="excel-font-lg ${isUp ? 'text-red-500' : 'text-emerald-600'}">${it.type}</span>
+                            <span class="excel-font-lg ${isUp ? 'text-red-600' : 'text-emerald-700'}">${it.diff.toFixed(0)}</span>
+                        </div>
+                    </div>
+                    <div class="excel-row-sub">
+                        <span class="excel-font-lg text-slate-500 opacity-80">${t}</span>
+                        <span class="excel-font-sm text-slate-600">${it.from.val.toFixed(0)}→${it.to.val.toFixed(0)}</span>
+                    </div>
+                    <div class="excel-row-val">
+                        <span class="text-slate-400 font-bold opacity-60">時間價值變化:</span>
+                        <span class="text-sky-600 opacity-80">三:</span>${formatOpt(it.wedDiff)}
+                        <span class="text-emerald-600 opacity-80 ml-1">五:</span>${formatOpt(it.friDiff)}
+                    </div>
+                </div>`;
         }
 
         function renderOnPageDetails(idx) {
@@ -356,27 +398,10 @@
 
             grid.innerHTML = '';
             if (stats.s100.list.length === 0) {
-                grid.innerHTML = '<div class="col-span-full py-6 text-center text-slate-300 italic font-bold uppercase tracking-widest text-[11px]">此盤無 100pt 以上波動</div>';
+                grid.innerHTML = '<div class="col-span-full py-6 text-center text-slate-300 italic font-bold">此盤無 100pt 以上波動</div>';
             } else {
                 stats.s100.list.forEach((it, i) => {
-                    const isUp = it.type === '上漲';
-                    const timeOnly = it.from.time.split(' ')[1] || it.from.time;
-                    const div = document.createElement('div');
-                    div.className = `excel-cell-ultra shadow-xs border-l-4 ${isUp ? 'border-l-red-500' : 'border-l-emerald-500'}`;
-                    div.innerHTML = `
-                        <div class="excel-row-main">
-                            <div class="flex items-center gap-1">
-                                <span class="excel-font-lg text-slate-400">#${i+1}</span>
-                                <span class="excel-font-lg ${isUp ? 'text-red-500' : 'text-emerald-600'}">${it.type}</span>
-                                <span class="excel-font-lg ${isUp ? 'text-red-600' : 'text-emerald-700'}">${it.diff.toFixed(0)}</span>
-                            </div>
-                        </div>
-                        <div class="excel-row-sub">
-                            <span class="excel-font-lg text-slate-500 opacity-80">${timeOnly}</span>
-                            <span class="excel-font-sm text-slate-600">${it.from.val.toFixed(0)} → ${it.to.val.toFixed(0)}</span>
-                        </div>
-                    `;
-                    grid.appendChild(div);
+                    grid.innerHTML += createExcelCellHtml(it, i);
                 });
             }
         }
@@ -412,19 +437,15 @@
             if (type === '50pt' || type === '100pt') {
                 const threshold = type === '50pt' ? 50 : 100;
                 const swingData = type === '50pt' ? stats.s50 : stats.s100;
-                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節`;
+                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節分析`;
                 summaryBar.classList.remove('hidden');
-                summaryBar.innerHTML = `<div class="flex-1 text-red-400">漲: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}pt</div><div class="flex-1 text-emerald-400 pl-3">跌: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}pt</div><div class="flex-1 text-orange-400 text-right">合: ${(swingData.upSum + swingData.downSum).toFixed(0)} pt</div>`;
+                summaryBar.innerHTML = `<div class="flex-1 text-red-400">上漲累積: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}pt</div><div class="flex-1 text-emerald-400 pl-3">下跌累積: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}pt</div><div class="flex-1 text-orange-400 text-right">該盤合計: ${(swingData.upSum + swingData.downSum).toFixed(0)} pt</div>`;
                 let html = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-0.5">`;
-                swingData.list.forEach((it, i) => {
-                    const isUp = it.type === '上漲';
-                    const t = it.from.time.split(' ')[1] || it.from.time;
-                    html += `<div class="excel-cell-ultra border-l-4 ${isUp?'border-l-red-500':'border-l-emerald-500'}"><div class="excel-row-main"><span class="excel-font-lg text-slate-400">#${i+1}</span><span class="excel-font-lg ${isUp?'text-red-500':'text-emerald-600'}">${it.type} ${it.diff.toFixed(0)}</span></div><div class="excel-row-sub"><span class="excel-font-lg text-slate-500">${t}</span><span class="excel-font-sm">${it.from.val.toFixed(0)}→${it.to.val.toFixed(0)}</span></div></div>`;
-                });
+                swingData.list.forEach((it, i) => { html += createExcelCellHtml(it, i); });
                 html += `</div>`; content.innerHTML = html;
             } else {
                 const isW = type === 'wed'; const d = isW ? stats.wed : stats.fri;
-                document.getElementById('modal-title').innerText = `${range.label} - ${isW?'週三':'週五'}選詳細基準`;
+                document.getElementById('modal-title').innerText = `${range.label} - ${isW?'週三':'週五'}選詳細報表`;
                 if (d) content.innerHTML = `<div class="grid grid-cols-2 gap-1 p-1"><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">P3 START</span><span class="text-lg font-black text-slate-800">${d.p3.toFixed(1)}</span></div><div class="border p-2 bg-white rounded flex flex-col items-center"><span class="text-[9px] font-bold text-slate-400">PL3 END</span><span class="text-lg font-black text-slate-800">${d.plast3.toFixed(1)}</span></div></div><div class="mx-1 bg-slate-900 rounded-lg p-5 text-center text-white shadow-xl mt-1"><p class="text-5xl font-black tracking-tighter">${d.d>0?'+':''}${d.d.toFixed(1)}</p><p class="text-lg font-black text-orange-400 mt-1">${d.p.toFixed(2)}%</p></div>`;
             }
             overlay.classList.add('active');
@@ -439,12 +460,13 @@
             
             if (chart && idx !== -1) {
                 const r = rowRanges[idx]; const sIdx = r.start - 2; const eIdx = Math.min(r.end - 2, globalData.x.length - 1);
-                const sX = (sIdx / globalData.x.length) * 100; const eX = (eIdx / globalData.x.length) * 100;
+                const sX = (sIdx / globalData.x.length) * 100, eX = (eIdx / globalData.x.length) * 100;
                 const subY1 = globalData.y1.slice(sIdx, eIdx + 1).filter(v => v !== null);
                 const subY2 = [...globalData.y2a.slice(sIdx, eIdx+1), ...globalData.y2b.slice(sIdx, eIdx+1)].filter(v => v !== null);
-                const allY1 = globalData.y1.filter(v => v !== null); const allY2 = [...globalData.y2a, ...globalData.y2b].filter(v => v !== null);
+                const allY1 = globalData.y1.filter(v => v !== null), allY2 = [...globalData.y2a, ...globalData.y2b].filter(v => v !== null);
                 const gMinY1 = Math.min(...allY1), gMaxY1 = Math.max(...allY1), gMinY2 = Math.min(...allY2), gMaxY2 = Math.max(...allY2);
                 const getPct = (v, min, max) => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
+
                 chart.dispatchAction({
                     type: 'dataZoom',
                     batch: [
@@ -469,7 +491,7 @@
                     const fmtD = (d) => d ? `${d.p.toFixed(0)}%` : '--';
                     const tr = document.createElement('tr');
                     tr.className = "hover:bg-orange-50/30 border-b border-slate-50 transition-colors text-center";
-                    tr.innerHTML = `<td class="p-1 font-bold border-r text-slate-500 text-left pl-2">${range.label}</td><td class="p-1 text-red-500 font-bold">${stats.s50.upCount}/${stats.s50.upSum.toFixed(0)} <span class="text-emerald-500 font-normal ml-1">${stats.s50.downCount}/${stats.s50.downSum.toFixed(0)}</span></td><td class="p-1 text-red-600 font-black border-r">${stats.s100.upCount}/${stats.s100.upSum.toFixed(0)} <span class="text-emerald-600 font-black ml-1">${stats.s100.downCount}/${stats.s100.downSum.toFixed(0)}</span></td><td class="p-1 ${stats.wed?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.wed)}</td><td class="p-1 ${stats.fri?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.fri)}</td>`;
+                    tr.innerHTML = `<td class="p-1 font-bold border-r text-slate-500 text-left pl-2">${range.label}</td><td class="p-1 text-red-500 font-bold">${stats.s50.upCount}/${stats.s50.upSum.toFixed(0)} <span class="text-emerald-500 font-normal ml-1">${stats.s50.downCount}/${stats.s50.downSum.toFixed(0)}</span></td><td class="p-1 text-red-600 font-black border-r">${stats.s100.upCount}/${stats.s100.upSum.toFixed(0)} <span class="text-emerald-600 ml-1">${stats.s100.downCount}/${stats.s100.downSum.toFixed(0)}</span></td><td class="p-1 ${stats.wed?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.wed)}</td><td class="p-1 ${stats.fri?.d<0?'text-red-500 font-bold':''}">${fmtD(stats.fri)}</td>`;
                     tbody.appendChild(tr);
                     markAreas.push([{ name: `${range.label}\n漲${stats.s100.upCount}跌${stats.s100.downCount}`, xAxis: data.x[start], itemStyle: { color: color }, label: { show: true, position: 'insideTopLeft', distance: 10, color: '#94a3b8', fontWeight: 'bold', fontSize: 8, lineHeight: 10, backgroundColor: 'rgba(255,255,255,0.7)', padding: [2, 4], borderRadius: 4, formatter: '{b}' } }, { xAxis: data.x[Math.min(range.end-2, data.x.length-1)] }]);
                 }
@@ -515,7 +537,6 @@
         window.onload = () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
             fetchData();
-            
             document.getElementById('card-50pt').onclick = () => showDetailedModal('50pt');
             document.getElementById('card-100pt').onclick = () => showDetailedModal('100pt');
             document.getElementById('card-wed').onclick = () => showDetailedModal('wed');
