@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V5.8.1</title>
+    <title>歐大時間價值追蹤儀 - V5.9.6</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -113,7 +113,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-base font-black text-slate-800 leading-none">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V5.8.1</span>
+                        <span class="version-badge">V5.9.6</span>
                     </div>
                 </div>
             </div>
@@ -140,23 +140,23 @@
         <div id="spotlight-panel" class="grid grid-cols-1 md:grid-cols-4 gap-2">
             <div id="card-50pt" class="glass-card p-2.5 border-l-4 border-l-orange-400 interactive-card flex flex-col justify-center">
                 <p class="stat-label-mini text-orange-500 mb-1 flex items-center gap-1 text-[9px] font-bold uppercase"><i data-lucide="activity" class="w-2.5 h-2.5"></i> 50點波段 (漲/跌/合)</p>
-                <div class="flex items-baseline justify-between">
-                    <span id="spot-up-50" class="stat-value-mini text-red-500 font-bold">--</span>
-                    <span class="text-slate-300 mx-1 text-[10px]">|</span>
-                    <span id="spot-down-50" class="stat-value-mini text-emerald-600 font-bold">--</span>
-                    <span class="text-slate-300 mx-1 text-[10px]">|</span>
-                    <span id="spot-sum-50" class="stat-sum-highlight text-orange-500">--</span>
+                <div class="flex flex-col gap-0.5">
+                    <div class="flex items-baseline justify-between">
+                        <span id="spot-up-50" class="text-[10px] text-red-500 font-bold">--</span>
+                        <span id="spot-sum-50" class="text-[10px] text-orange-600 font-bold">--</span>
+                    </div>
+                    <span id="spot-down-50" class="text-[10px] text-emerald-600 font-bold">--</span>
                 </div>
             </div>
 
             <div id="card-100pt" class="glass-card p-2.5 border-l-4 border-l-orange-600 interactive-card flex flex-col justify-center">
                 <p class="stat-label-mini text-orange-700 mb-1 flex items-center gap-1 text-[9px] font-bold uppercase"><i data-lucide="flame" class="w-2.5 h-2.5"></i> 100點波段 (漲/跌/合)</p>
-                <div class="flex items-baseline justify-between">
-                    <span id="spot-up-100" class="stat-value-mini text-red-500 font-black">--</span>
-                    <span class="text-slate-300 mx-1 text-[10px]">|</span>
-                    <span id="spot-down-100" class="stat-value-mini text-emerald-600 font-black">--</span>
-                    <span class="text-slate-300 mx-1 text-[10px]">|</span>
-                    <span id="spot-sum-100" class="stat-sum-highlight text-orange-700">--</span>
+                <div class="flex flex-col gap-0.5">
+                    <div class="flex items-baseline justify-between">
+                        <span id="spot-up-100" class="text-[10px] text-red-500 font-bold">--</span>
+                        <span id="spot-sum-100" class="text-[10px] text-orange-700 font-bold">--</span>
+                    </div>
+                    <span id="spot-down-100" class="text-[10px] text-emerald-600 font-bold">--</span>
                 </div>
             </div>
 
@@ -351,7 +351,6 @@
             };
         }
 
-        // V5.8.1 修改：更新文字為「時間價值變化:」
         function createExcelCellHtml(it, i) {
             const isUp = it.type === '上漲';
             const t = it.from.time.split(' ')[1] || it.from.time;
@@ -409,12 +408,17 @@
         function updateSpotlight(idx) {
             if (idx === -1 || !globalData) return;
             const stats = calculateStats(rowRanges[idx], globalData);
-            document.getElementById('spot-up-50').innerText = `${stats.s50.upCount}/${stats.s50.upSum.toFixed(0)}`;
-            document.getElementById('spot-down-50').innerText = `${stats.s50.downCount}/${stats.s50.downSum.toFixed(0)}`;
-            document.getElementById('spot-sum-50').innerText = (stats.s50.upSum + stats.s50.downSum).toFixed(0);
-            document.getElementById('spot-up-100').innerText = `${stats.s100.upCount}/${stats.s100.upSum.toFixed(0)}`;
-            document.getElementById('spot-down-100').innerText = `${stats.s100.downCount}/${stats.s100.downSum.toFixed(0)}`;
-            document.getElementById('spot-sum-100').innerText = (stats.s100.upSum + stats.s100.downSum).toFixed(0);
+            
+            const fmtSpot = (prefix, count, sum) => `${prefix}<span class="text-[12px] font-black mx-0.5">${count}</span>次/${prefix}共<span class="text-[12px] font-black mx-0.5">${sum.toFixed(0)}</span>點`;
+            
+            document.getElementById('spot-up-50').innerHTML = fmtSpot('上漲', stats.s50.upCount, stats.s50.upSum);
+            document.getElementById('spot-down-50').innerHTML = fmtSpot('下跌', stats.s50.downCount, stats.s50.downSum);
+            document.getElementById('spot-sum-50').innerHTML = `合計震幅 <span class="text-[12px] font-black ml-0.5">${(stats.s50.upSum + stats.s50.downSum).toFixed(0)}</span>`;
+            
+            document.getElementById('spot-up-100').innerHTML = fmtSpot('上漲', stats.s100.upCount, stats.s100.upSum);
+            document.getElementById('spot-down-100').innerHTML = fmtSpot('下跌', stats.s100.downCount, stats.s100.downSum);
+            document.getElementById('spot-sum-100').innerHTML = `合計震幅 <span class="text-[12px] font-black ml-0.5">${(stats.s100.upSum + stats.s100.downSum).toFixed(0)}</span>`;
+            
             const fmt = (vId, pId, d) => {
                 const el = document.getElementById(vId), pEl = document.getElementById(pId);
                 if (!d) { el.innerText = '--'; pEl.innerText = '--%'; return; }
@@ -461,20 +465,56 @@
             if (chart && idx !== -1) {
                 const r = rowRanges[idx]; const sIdx = r.start - 2; const eIdx = Math.min(r.end - 2, globalData.x.length - 1);
                 const sX = (sIdx / globalData.x.length) * 100, eX = (eIdx / globalData.x.length) * 100;
+                
+                // 獲取當前區間資料並過濾空值
                 const subY1 = globalData.y1.slice(sIdx, eIdx + 1).filter(v => v !== null);
-                const subY2 = [...globalData.y2a.slice(sIdx, eIdx+1), ...globalData.y2b.slice(sIdx, eIdx+1)].filter(v => v !== null);
-                const allY1 = globalData.y1.filter(v => v !== null), allY2 = [...globalData.y2a, ...globalData.y2b].filter(v => v !== null);
-                const gMinY1 = Math.min(...allY1), gMaxY1 = Math.max(...allY1), gMinY2 = Math.min(...allY2), gMaxY2 = Math.max(...allY2);
-                const getPct = (v, min, max) => Math.max(0, Math.min(100, ((v - min) / (max - min)) * 100));
+                const subY2 = [
+                    ...globalData.y2a.slice(sIdx, eIdx+1), 
+                    ...globalData.y2b.slice(sIdx, eIdx+1),
+                    ...globalData.yAvg.slice(sIdx, eIdx+1),
+                    ...globalData.yFriAvg.slice(sIdx, eIdx+1)
+                ].filter(v => v !== null);
+                
+                // 獲取全局資料計算極值
+                const allY1 = globalData.y1.filter(v => v !== null);
+                const allY2 = [
+                    ...globalData.y2a, 
+                    ...globalData.y2b,
+                    ...globalData.yAvg,
+                    ...globalData.yFriAvg
+                ].filter(v => v !== null);
+                
+                const gMinY1 = Math.min(...allY1), gMaxY1 = Math.max(...allY1);
+                const gMinY2 = Math.min(...allY2), gMaxY2 = Math.max(...allY2);
+                
+                // 修正 NaN 錯誤：如果 max 和 min 相同，直接給予 50%
+                const getPct = (v, min, max) => {
+                    if (min >= max) return 50;
+                    const pct = ((v - min) / (max - min)) * 100;
+                    return Math.max(0, Math.min(100, pct));
+                };
 
-                chart.dispatchAction({
-                    type: 'dataZoom',
-                    batch: [
-                        { dataZoomIndex: 0, start: sX, end: eX },
-                        { dataZoomIndex: 1, start: getPct(Math.min(...subY1)*0.996, gMinY1, gMaxY1), end: getPct(Math.max(...subY1)*1.004, gMinY1, gMaxY1) },
-                        { dataZoomIndex: 2, start: getPct(Math.min(...subY2)*0.92, gMinY2, gMaxY2), end: getPct(Math.max(...subY2)*1.08, gMinY2, gMaxY2) }
-                    ]
-                });
+                let batch = [{ dataZoomIndex: 0, start: sX, end: eX }];
+                
+                // 防呆處理：確保該區間有期指資料且極值正常，否則給予完整的 0~100 區間
+                if (subY1.length > 0 && gMinY1 < gMaxY1) {
+                    const sMin = Math.min(...subY1);
+                    const sMax = Math.max(...subY1);
+                    batch.push({ dataZoomIndex: 1, start: getPct(sMin * 0.996, gMinY1, gMaxY1), end: getPct(sMax * 1.004, gMinY1, gMaxY1) });
+                } else {
+                    batch.push({ dataZoomIndex: 1, start: 0, end: 100 });
+                }
+
+                // 防呆處理：確保該區間有選擇權/平均資料且極值正常，否則給予完整的 0~100 區間
+                if (subY2.length > 0 && gMinY2 < gMaxY2) {
+                    const sMin = Math.min(...subY2);
+                    const sMax = Math.max(...subY2);
+                    batch.push({ dataZoomIndex: 2, start: getPct(sMin * 0.92, gMinY2, gMaxY2), end: getPct(sMax * 1.08, gMinY2, gMaxY2) });
+                } else {
+                    batch.push({ dataZoomIndex: 2, start: 0, end: 100 });
+                }
+
+                chart.dispatchAction({ type: 'dataZoom', batch });
             }
         }
 
@@ -497,12 +537,23 @@
                 }
             });
             const opt = {
-                backgroundColor: '#ffffff', legend: { data: ['期貨指數', '週三選', '週五選'], top: 2, textStyle: { color: '#64748b', fontWeight: 'bold', fontSize: 11 } },
+                backgroundColor: '#ffffff', 
+                legend: { 
+                    data: ['期貨指數', '週三選', '週五選', '週三平均', '週五平均'], 
+                    top: 2, 
+                    textStyle: { color: '#64748b', fontWeight: 'bold', fontSize: 11 } 
+                },
                 grid: { top: '8%', left: '50', right: '50', bottom: '50', containLabel: true }, tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
                 dataZoom: [{ type: 'slider', xAxisIndex:[0], bottom: 5, height: 25, fillerColor: 'rgba(249, 115, 22, 0.1)', handleStyle: { color: '#f97316' } }, { type: 'slider', yAxisIndex:[0], left: '1', width: 10 }, { type: 'slider', yAxisIndex:[1], right: '1', width: 10 }, { type: 'inside', xAxisIndex:[0] }],
                 xAxis: { type: 'category', data: data.x, boundaryGap: false, axisLabel: { fontSize: 8, color: '#cbd5e1' } },
                 yAxis: [{ type: 'value', name: '期指', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }, { type: 'value', name: '選', position: 'right', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }],
-                series: [{ name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#2563eb' }, areaStyle: { color: 'rgba(37, 99, 235, 0.1)' }, markArea: { silent: true, data: markAreas }, markPoint: markExtrema }, { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#059669' }, markPoint: markExtrema }, { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#d97706', type: 'dashed' }, markPoint: markExtrema }]
+                series: [
+                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#2563eb' }, areaStyle: { color: 'rgba(37, 99, 235, 0.1)' }, markArea: { silent: true, data: markAreas }, markPoint: markExtrema }, 
+                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#059669' }, markPoint: markExtrema }, 
+                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#d97706', type: 'dashed' }, markPoint: markExtrema },
+                    { name: '週三平均', type: 'line', yAxisIndex: 1, data: data.yAvg, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#8b5cf6', type: 'solid' }, markPoint: markExtrema },
+                    { name: '週五平均', type: 'line', yAxisIndex: 1, data: data.yFriAvg, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#ec4899', type: 'solid' }, markPoint: markExtrema }
+                ]
             };
             chart.setOption(opt);
         }
@@ -513,12 +564,19 @@
                 const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
                 const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-                const data = { x: [], y1: [], y2a: [], y2b: [] };
+                const data = { x: [], y1: [], y2a: [], y2b: [], yAvg: [], yFriAvg: [] };
+                
                 for (let i = 1; i < lines.length; i++) {
                     const cols = parseCSVLine(lines[i]);
                     if (cols.length >= 4) {
-                        data.x.push(cols[0]); data.y1.push(cleanNumeric(cols[1]));
-                        data.y2a.push(cleanNumeric(cols[2])); data.y2b.push(cleanNumeric(cols[3]));
+                        data.x.push(cols[0]); 
+                        data.y1.push(cleanNumeric(cols[1]));
+                        data.y2a.push(cleanNumeric(cols[2])); 
+                        data.y2b.push(cleanNumeric(cols[3]));
+                        // 讀取 Column E 作為週三平均
+                        data.yAvg.push(cols.length >= 5 ? cleanNumeric(cols[4]) : null); 
+                        // 讀取 Column F 作為週五平均
+                        data.yFriAvg.push(cols.length >= 6 ? cleanNumeric(cols[5]) : null);
                     }
                 }
                 globalData = data; initChart(data);
