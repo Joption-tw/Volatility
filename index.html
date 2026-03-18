@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大百點震幅統計表 - V6.0.0</title>
+    <title>歐大百點震幅統計表 - V6.0.4</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -113,7 +113,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-base font-black text-slate-800 leading-none">歐大百點震幅統計表</h1>
-                        <span class="version-badge">V6.0.0</span>
+                        <span class="version-badge">V6.0.4</span>
                         <span id="current-time-display" class="text-[10px] font-bold text-slate-400 font-mono tracking-tight ml-1"></span>
                     </div>
                 </div>
@@ -257,53 +257,52 @@
         let chart; let globalData = null; let currentSessionIdx = -1;
         
         const rowRanges = [
-            { label: '周三晚', start: 2, end: 419, type: 'night' }, // 0
-            { label: '週四早', start: 420, end: 569, type: 'day' },   // 1
-            { label: '周四晚', start: 570, end: 989, type: 'night' }, // 2
-            { label: '週五早', start: 990, end: 1139, type: 'day' },  // 3
-            { label: '週五晚', start: 1140, end: 1559, type: 'night' },// 4
-            { label: '周一早', start: 1560, end: 1709, type: 'day' },  // 5
-            { label: '周一晚', start: 1710, end: 2129, type: 'night' },// 6
-            { label: '週二早', start: 2130, end: 2279, type: 'day' },  // 7
-            { label: '周二晚', start: 2280, end: 2699, type: 'night' },// 8
-            { label: '週三早', start: 2700, end: 2849, type: 'day' }   // 9
+            { label: '周三晚', start: 2, end: 419, type: 'night' }, 
+            { label: '週四早', start: 420, end: 569, type: 'day' },   
+            { label: '周四晚', start: 570, end: 989, type: 'night' }, 
+            { label: '週五早', start: 990, end: 1139, type: 'day' },  
+            { label: '週五晚', start: 1140, end: 1559, type: 'night' },
+            { label: '周一早', start: 1560, end: 1709, type: 'day' },  
+            { label: '周一晚', start: 1710, end: 2129, type: 'night' },
+            { label: '週二早', start: 2130, end: 2279, type: 'day' },  
+            { label: '周二晚', start: 2280, end: 2699, type: 'night' },
+            { label: '週三早', start: 2700, end: 2849, type: 'day' }   
         ];
 
-        // 核心邏輯：根據當前時間判斷應顯示哪一盤
         function getAutoSessionIndex() {
             const now = new Date();
-            const day = now.getDay(); // 0:日, 1:一, 2:二, 3:三, 4:四, 5:五, 6:六
+            const day = now.getDay(); 
             const hour = now.getHours();
 
-            if (day === 1) { // 週一
-                if (hour < 6) return 4; // 週五晚
-                if (hour < 14) return 5; // 週一早
-                return 6; // 週一晚
+            if (day === 1) { 
+                if (hour < 6) return 4; 
+                if (hour < 14) return 5; 
+                return 6; 
             }
-            if (day === 2) { // 週二
-                if (hour < 6) return 6; // 週一晚
-                if (hour < 14) return 7; // 週二早
-                return 8; // 週二晚
+            if (day === 2) { 
+                if (hour < 6) return 6; 
+                if (hour < 14) return 7; 
+                return 8; 
             }
-            if (day === 3) { // 週三
-                if (hour < 6) return 8; // 週二晚
-                if (hour < 14) return 9; // 週三早
-                return 0; // 週三晚
+            if (day === 3) { 
+                if (hour < 6) return 8; 
+                if (hour < 14) return 9; 
+                return 0; 
             }
-            if (day === 4) { // 週四
-                if (hour < 6) return 0; // 週三晚
-                if (hour < 14) return 1; // 週四早
-                return 2; // 週四晚
+            if (day === 4) { 
+                if (hour < 6) return 0; 
+                if (hour < 14) return 1; 
+                return 2; 
             }
-            if (day === 5) { // 週五
-                if (hour < 6) return 2; // 週四晚
-                if (hour < 14) return 3; // 週五早
-                return 4; // 週五晚
+            if (day === 5) { 
+                if (hour < 6) return 2; 
+                if (hour < 14) return 3; 
+                return 4; 
             }
-            if (day === 6 || day === 0) { // 週六日
-                return 4; // 週五晚
+            if (day === 6 || day === 0) { 
+                return 4; 
             }
-            return 4; // 預設週五晚
+            return 4; 
         }
 
         function updateLiveTime() {
@@ -329,10 +328,63 @@
             res.push(cur.trim()); return res;
         }
 
-        function cleanNumeric(v) {
+        /**
+         * 加強版數值轉換：嚴格處理 0 與 極小值 (如截圖中的 2.7e-27)
+         * 凡是小於等於 0.01 的數據皆視為 null，不繪製且不參與計算。
+         */
+        function rawNumeric(v) {
             if (v === undefined || v === null || v.toString().trim() === "") return null;
-            const num = parseFloat(v.toString().replace(/,/g, '').replace(/[^0-9.-]/g, ''));
-            return (isNaN(num) || num === 0) ? null : num;
+            let num = parseFloat(v.toString().replace(/,/g, '').replace(/[^0-9.-]/g, ''));
+            // 只要數值小於等於 0.01，就視為無效/無數據，回傳 null 以形成斷點
+            if (isNaN(num) || num <= 0.01) return null;
+            return num;
+        }
+
+        /**
+         * 偵測單點異常雜訊 (Spike Rejection)
+         */
+        function filterSpikes(arr, threshold = 0.003) {
+            const result = [...arr];
+            for (let i = 1; i < arr.length - 1; i++) {
+                const prev = arr[i - 1];
+                const curr = arr[i];
+                const next = arr[i + 1];
+                
+                if (prev !== null && curr !== null && next !== null) {
+                    const diffPrev = Math.abs((curr - prev) / prev);
+                    const diffNext = Math.abs((curr - next) / next);
+                    const diffStability = Math.abs((prev - next) / next);
+                    
+                    if (diffPrev > threshold && diffNext > threshold && diffStability < threshold) {
+                        result[i] = (prev + next) / 2;
+                    }
+                }
+            }
+            return result;
+        }
+
+        /**
+         * 潤滑數列 (加權移動平均 WMA)
+         */
+        function lubricate(arr) {
+            const result = [];
+            for (let i = 0; i < arr.length; i++) {
+                if (arr[i] === null) {
+                    result.push(null);
+                    continue;
+                }
+                let sum = 0, count = 0;
+                for (let j = -1; j <= 1; j++) {
+                    const idx = i + j;
+                    if (idx >= 0 && idx < arr.length && arr[idx] !== null) {
+                        const weight = j === 0 ? 2 : 1;
+                        sum += arr[idx] * weight;
+                        count += weight;
+                    }
+                }
+                result.push(count > 0 ? sum / count : null);
+            }
+            return result;
         }
 
         function detectSwingsWithOption(prices, times, weds, fris, threshold) {
@@ -384,8 +436,8 @@
             const start = range.start - 2; const end = range.end - 2;
             const subY1 = [], subT = [], subW = [], subF = [];
             for (let i = start; i <= end; i++) {
-                subY1.push(data.y1[i]); subT.push(data.x[i]);
-                subW.push(data.y2a[i]); subF.push(data.y2b[i]);
+                subY1.push(data.y1_raw[i]); subT.push(data.x[i]);
+                subW.push(data.y2a_raw[i]); subF.push(data.y2b_raw[i]);
             }
             const getDecay = (sub) => {
                 const f = sub.filter(v => v !== null);
@@ -593,11 +645,11 @@
                 xAxis: { type: 'category', data: data.x, boundaryGap: false, axisLabel: { fontSize: 8, color: '#cbd5e1' } },
                 yAxis: [{ type: 'value', name: '期指', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }, { type: 'value', name: '選', position: 'right', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }],
                 series: [
-                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#2563eb' }, areaStyle: { color: 'rgba(37, 99, 235, 0.1)' }, markArea: { silent: true, data: markAreas }, markPoint: markExtrema }, 
-                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#059669' }, markPoint: markExtrema }, 
-                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: true, showSymbol: false, lineStyle: { width: 1.5, color: '#d97706', type: 'dashed' }, markPoint: markExtrema },
-                    { name: '週三平均', type: 'line', yAxisIndex: 1, data: data.yAvg, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#8b5cf6', type: 'solid' }, markPoint: markExtrema },
-                    { name: '週五平均', type: 'line', yAxisIndex: 1, data: data.yFriAvg, smooth: true, showSymbol: false, lineStyle: { width: 2, color: '#ec4899', type: 'solid' }, markPoint: markExtrema }
+                    { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#2563eb' }, areaStyle: { color: 'rgba(37, 99, 235, 0.1)' }, markArea: { silent: true, data: markAreas }, markPoint: markExtrema, connectNulls: false }, 
+                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: 0.45, showSymbol: false, lineStyle: { width: 1.5, color: '#059669' }, markPoint: markExtrema, connectNulls: false }, 
+                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: 0.45, showSymbol: false, lineStyle: { width: 1.5, color: '#d97706', type: 'dashed' }, markPoint: markExtrema, connectNulls: false },
+                    { name: '週三平均', type: 'line', yAxisIndex: 1, data: data.yAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#8b5cf6', type: 'solid' }, markPoint: markExtrema, connectNulls: false },
+                    { name: '週五平均', type: 'line', yAxisIndex: 1, data: data.yFriAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#ec4899', type: 'solid' }, markPoint: markExtrema, connectNulls: false }
                 ]
             };
             chart.setOption(opt);
@@ -609,22 +661,33 @@
                 const response = await fetch(`${CSV_URL}&t=${Date.now()}`);
                 const text = await response.text();
                 const lines = text.split(/\r?\n/).filter(line => line.trim() !== '');
-                const data = { x: [], y1: [], y2a: [], y2b: [], yAvg: [], yFriAvg: [] };
+                
+                const raw = { x: [], y1: [], y2a: [], y2b: [], yAvg: [], yFriAvg: [] };
                 
                 for (let i = 1; i < lines.length; i++) {
                     const cols = parseCSVLine(lines[i]);
                     if (cols.length >= 4) {
-                        data.x.push(cols[0]); 
-                        data.y1.push(cleanNumeric(cols[1]));
-                        data.y2a.push(cleanNumeric(cols[2])); 
-                        data.y2b.push(cleanNumeric(cols[3]));
-                        data.yAvg.push(cols.length >= 5 ? cleanNumeric(cols[4]) : null); 
-                        data.yFriAvg.push(cols.length >= 6 ? cleanNumeric(cols[5]) : null);
+                        raw.x.push(cols[0]); 
+                        raw.y1.push(rawNumeric(cols[1]));
+                        raw.y2a.push(rawNumeric(cols[2])); 
+                        raw.y2b.push(rawNumeric(cols[3]));
+                        raw.yAvg.push(cols.length >= 5 ? rawNumeric(cols[4]) : null); 
+                        raw.yFriAvg.push(cols.length >= 6 ? rawNumeric(cols[5]) : null);
                     }
                 }
-                globalData = data; initChart(data);
 
-                // 更新按鈕
+                globalData = {
+                    x: raw.x,
+                    y1_raw: raw.y1, y2a_raw: raw.y2a, y2b_raw: raw.y2b,
+                    y1: lubricate(filterSpikes(raw.y1, 0.003)),
+                    y2a: lubricate(filterSpikes(raw.y2a, 0.08)),
+                    y2b: lubricate(filterSpikes(raw.y2b, 0.08)),
+                    yAvg: lubricate(raw.yAvg),
+                    yFriAvg: lubricate(raw.yFriAvg)
+                };
+
+                initChart(globalData);
+
                 const switcher = document.getElementById('session-switcher'); switcher.innerHTML = '';
                 rowRanges.forEach((range, i) => {
                     const btn = document.createElement('button');
@@ -632,15 +695,12 @@
                     btn.onclick = () => selectSession(i); switcher.appendChild(btn);
                 });
 
-                // 自動判斷初始時段
                 let autoIdx = getAutoSessionIndex();
-                
-                if ((rowRanges[autoIdx].start - 2) >= data.x.length) {
+                if ((rowRanges[autoIdx].start - 2) >= raw.x.length) {
                     let lastValid = rowRanges.length - 1; 
-                    while(lastValid >= 0 && (rowRanges[lastValid].start - 2) >= data.x.length) lastValid--;
+                    while(lastValid >= 0 && (rowRanges[lastValid].start - 2) >= raw.x.length) lastValid--;
                     autoIdx = lastValid;
                 }
-                
                 if(autoIdx >= 0) selectSession(autoIdx);
 
             } catch (e) { console.error(e); }
