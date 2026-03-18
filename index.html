@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大時間價值追蹤儀 - V5.9.6</title>
+    <title>歐大百點震幅統計表 - V6.0.0</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
@@ -112,8 +112,9 @@
                 <div class="hidden bg-orange-500/10 p-1.5 rounded-md"><i data-lucide="layout" class="text-orange-600 w-4 h-4"></i></div>
                 <div>
                     <div class="flex items-center gap-1.5">
-                        <h1 class="text-base font-black text-slate-800 leading-none">歐大時間價值追蹤儀</h1>
-                        <span class="version-badge">V5.9.6</span>
+                        <h1 class="text-base font-black text-slate-800 leading-none">歐大百點震幅統計表</h1>
+                        <span class="version-badge">V6.0.0</span>
+                        <span id="current-time-display" class="text-[10px] font-bold text-slate-400 font-mono tracking-tight ml-1"></span>
                     </div>
                 </div>
             </div>
@@ -256,17 +257,66 @@
         let chart; let globalData = null; let currentSessionIdx = -1;
         
         const rowRanges = [
-            { label: '周三晚', start: 2, end: 419, type: 'night' },
-            { label: '週四早', start: 420, end: 569, type: 'day' },
-            { label: '周四晚', start: 570, end: 989, type: 'night' },
-            { label: '週五早', start: 990, end: 1139, type: 'day' },
-            { label: '週五晚', start: 1140, end: 1559, type: 'night' },
-            { label: '周一早', start: 1560, end: 1709, type: 'day' },
-            { label: '周一晚', start: 1710, end: 2129, type: 'night' },
-            { label: '週二早', start: 2130, end: 2279, type: 'day' },
-            { label: '周二晚', start: 2280, end: 2699, type: 'night' },
-            { label: '週三早', start: 2700, end: 2849, type: 'day' }
+            { label: '周三晚', start: 2, end: 419, type: 'night' }, // 0
+            { label: '週四早', start: 420, end: 569, type: 'day' },   // 1
+            { label: '周四晚', start: 570, end: 989, type: 'night' }, // 2
+            { label: '週五早', start: 990, end: 1139, type: 'day' },  // 3
+            { label: '週五晚', start: 1140, end: 1559, type: 'night' },// 4
+            { label: '周一早', start: 1560, end: 1709, type: 'day' },  // 5
+            { label: '周一晚', start: 1710, end: 2129, type: 'night' },// 6
+            { label: '週二早', start: 2130, end: 2279, type: 'day' },  // 7
+            { label: '周二晚', start: 2280, end: 2699, type: 'night' },// 8
+            { label: '週三早', start: 2700, end: 2849, type: 'day' }   // 9
         ];
+
+        // 核心邏輯：根據當前時間判斷應顯示哪一盤
+        function getAutoSessionIndex() {
+            const now = new Date();
+            const day = now.getDay(); // 0:日, 1:一, 2:二, 3:三, 4:四, 5:五, 6:六
+            const hour = now.getHours();
+
+            if (day === 1) { // 週一
+                if (hour < 6) return 4; // 週五晚
+                if (hour < 14) return 5; // 週一早
+                return 6; // 週一晚
+            }
+            if (day === 2) { // 週二
+                if (hour < 6) return 6; // 週一晚
+                if (hour < 14) return 7; // 週二早
+                return 8; // 週二晚
+            }
+            if (day === 3) { // 週三
+                if (hour < 6) return 8; // 週二晚
+                if (hour < 14) return 9; // 週三早
+                return 0; // 週三晚
+            }
+            if (day === 4) { // 週四
+                if (hour < 6) return 0; // 週三晚
+                if (hour < 14) return 1; // 週四早
+                return 2; // 週四晚
+            }
+            if (day === 5) { // 週五
+                if (hour < 6) return 2; // 週四晚
+                if (hour < 14) return 3; // 週五早
+                return 4; // 週五晚
+            }
+            if (day === 6 || day === 0) { // 週六日
+                return 4; // 週五晚
+            }
+            return 4; // 預設週五晚
+        }
+
+        function updateLiveTime() {
+            const now = new Date();
+            const year = now.getFullYear();
+            const month = String(now.getMonth() + 1).padStart(2, '0');
+            const day = String(now.getDate()).padStart(2, '0');
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const timeStr = `${year}/${month}/${day} ${hours}:${minutes}`;
+            const display = document.getElementById('current-time-display');
+            if (display) display.innerText = timeStr;
+        }
 
         function parseCSVLine(text) {
             const res = []; let cur = ""; let inQ = false;
@@ -466,7 +516,6 @@
                 const r = rowRanges[idx]; const sIdx = r.start - 2; const eIdx = Math.min(r.end - 2, globalData.x.length - 1);
                 const sX = (sIdx / globalData.x.length) * 100, eX = (eIdx / globalData.x.length) * 100;
                 
-                // 獲取當前區間資料並過濾空值
                 const subY1 = globalData.y1.slice(sIdx, eIdx + 1).filter(v => v !== null);
                 const subY2 = [
                     ...globalData.y2a.slice(sIdx, eIdx+1), 
@@ -475,7 +524,6 @@
                     ...globalData.yFriAvg.slice(sIdx, eIdx+1)
                 ].filter(v => v !== null);
                 
-                // 獲取全局資料計算極值
                 const allY1 = globalData.y1.filter(v => v !== null);
                 const allY2 = [
                     ...globalData.y2a, 
@@ -487,7 +535,6 @@
                 const gMinY1 = Math.min(...allY1), gMaxY1 = Math.max(...allY1);
                 const gMinY2 = Math.min(...allY2), gMaxY2 = Math.max(...allY2);
                 
-                // 修正 NaN 錯誤：如果 max 和 min 相同，直接給予 50%
                 const getPct = (v, min, max) => {
                     if (min >= max) return 50;
                     const pct = ((v - min) / (max - min)) * 100;
@@ -496,7 +543,6 @@
 
                 let batch = [{ dataZoomIndex: 0, start: sX, end: eX }];
                 
-                // 防呆處理：確保該區間有期指資料且極值正常，否則給予完整的 0~100 區間
                 if (subY1.length > 0 && gMinY1 < gMaxY1) {
                     const sMin = Math.min(...subY1);
                     const sMax = Math.max(...subY1);
@@ -505,7 +551,6 @@
                     batch.push({ dataZoomIndex: 1, start: 0, end: 100 });
                 }
 
-                // 防呆處理：確保該區間有選擇權/平均資料且極值正常，否則給予完整的 0~100 區間
                 if (subY2.length > 0 && gMinY2 < gMaxY2) {
                     const sMin = Math.min(...subY2);
                     const sMax = Math.max(...subY2);
@@ -573,27 +618,39 @@
                         data.y1.push(cleanNumeric(cols[1]));
                         data.y2a.push(cleanNumeric(cols[2])); 
                         data.y2b.push(cleanNumeric(cols[3]));
-                        // 讀取 Column E 作為週三平均
                         data.yAvg.push(cols.length >= 5 ? cleanNumeric(cols[4]) : null); 
-                        // 讀取 Column F 作為週五平均
                         data.yFriAvg.push(cols.length >= 6 ? cleanNumeric(cols[5]) : null);
                     }
                 }
                 globalData = data; initChart(data);
+
+                // 更新按鈕
                 const switcher = document.getElementById('session-switcher'); switcher.innerHTML = '';
                 rowRanges.forEach((range, i) => {
                     const btn = document.createElement('button');
                     btn.className = `session-btn ${range.type === 'night' ? 'night' : ''}`; btn.innerText = range.label;
                     btn.onclick = () => selectSession(i); switcher.appendChild(btn);
                 });
-                let lastValid = rowRanges.length - 1; while(lastValid >= 0 && (rowRanges[lastValid].start - 2) >= data.x.length) lastValid--;
-                if(lastValid >= 0) selectSession(lastValid);
+
+                // 自動判斷初始時段
+                let autoIdx = getAutoSessionIndex();
+                
+                if ((rowRanges[autoIdx].start - 2) >= data.x.length) {
+                    let lastValid = rowRanges.length - 1; 
+                    while(lastValid >= 0 && (rowRanges[lastValid].start - 2) >= data.x.length) lastValid--;
+                    autoIdx = lastValid;
+                }
+                
+                if(autoIdx >= 0) selectSession(autoIdx);
+
             } catch (e) { console.error(e); }
             finally { setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 300); }, 500); }
         }
 
         window.onload = () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateLiveTime();
+            setInterval(updateLiveTime, 60000);
             fetchData();
             document.getElementById('card-50pt').onclick = () => showDetailedModal('50pt');
             document.getElementById('card-100pt').onclick = () => showDetailedModal('100pt');
