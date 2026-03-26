@@ -166,7 +166,7 @@
                     <p class="stat-label-mini text-sky-600 mb-0.5 text-[9px] font-bold uppercase">週三選耗損</p>
                     <span id="spot-wed-val" class="text-[18px] font-black tracking-tighter leading-none text-slate-800">--</span>
                 </div>
-                <span id="spot-wed-pct" class="text-[11px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
+                <span id="spot-wed-pct" class="text-[22px] font-black text-blue-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
             </div>
 
             <div id="card-fri" class="glass-card p-2.5 border-l-4 border-l-emerald-500 interactive-card flex items-center justify-between">
@@ -174,7 +174,7 @@
                     <p class="stat-label-mini text-emerald-600 mb-0.5 text-[9px] font-bold uppercase">週五選耗損</p>
                     <span id="spot-fri-val" class="text-[18px] font-black tracking-tighter leading-none text-slate-800">--</span>
                 </div>
-                <span id="spot-fri-pct" class="text-[11px] font-bold text-slate-400 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
+                <span id="spot-fri-pct" class="text-[22px] font-black text-blue-600 bg-slate-50 px-1.5 py-0.5 rounded border border-slate-100">--%</span>
             </div>
         </div>
 
@@ -328,21 +328,13 @@
             res.push(cur.trim()); return res;
         }
 
-        /**
-         * 加強版數值轉換：嚴格處理 0 與 極小值 (如截圖中的 2.7e-27)
-         * 凡是小於等於 0.01 的數據皆視為 null，不繪製且不參與計算。
-         */
         function rawNumeric(v) {
             if (v === undefined || v === null || v.toString().trim() === "") return null;
             let num = parseFloat(v.toString().replace(/,/g, '').replace(/[^0-9.-]/g, ''));
-            // 只要數值小於等於 0.01，就視為無效/無數據，回傳 null 以形成斷點
             if (isNaN(num) || num <= 0.01) return null;
             return num;
         }
 
-        /**
-         * 偵測單點異常雜訊 (Spike Rejection)
-         */
         function filterSpikes(arr, threshold = 0.003) {
             const result = [...arr];
             for (let i = 1; i < arr.length - 1; i++) {
@@ -363,9 +355,6 @@
             return result;
         }
 
-        /**
-         * 潤滑數列 (加權移動平均 WMA)
-         */
         function lubricate(arr) {
             const result = [];
             for (let i = 0; i < arr.length; i++) {
@@ -543,7 +532,7 @@
             if (type === '50pt' || type === '100pt') {
                 const threshold = type === '50pt' ? 50 : 100;
                 const swingData = type === '50pt' ? stats.s50 : stats.s100;
-                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節分析`;
+                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節 analysis`;
                 summaryBar.classList.remove('hidden');
                 summaryBar.innerHTML = `<div class="flex-1 text-red-400">上漲累積: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}pt</div><div class="flex-1 text-emerald-400 pl-3">下跌累積: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}pt</div><div class="flex-1 text-orange-400 text-right">該盤合計: ${(swingData.upSum + swingData.downSum).toFixed(0)} pt</div>`;
                 let html = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-0.5">`;
@@ -640,16 +629,47 @@
                     top: 2, 
                     textStyle: { color: '#64748b', fontWeight: 'bold', fontSize: 11 } 
                 },
-                grid: { top: '8%', left: '50', right: '50', bottom: '50', containLabel: true }, tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
-                dataZoom: [{ type: 'slider', xAxisIndex:[0], bottom: 5, height: 25, fillerColor: 'rgba(249, 115, 22, 0.1)', handleStyle: { color: '#f97316' } }, { type: 'slider', yAxisIndex:[0], left: '1', width: 10 }, { type: 'slider', yAxisIndex:[1], right: '1', width: 10 }, { type: 'inside', xAxisIndex:[0] }],
+                grid: { top: '8%', left: '70', right: '70', bottom: '60', containLabel: true }, tooltip: { trigger: 'axis', axisPointer: { type: 'cross' } },
+                dataZoom: [
+                    { 
+                        type: 'slider', 
+                        xAxisIndex:[0], 
+                        bottom: 10, 
+                        height: 35, 
+                        fillerColor: 'rgba(249, 115, 22, 0.15)', 
+                        borderColor: 'rgba(226, 232, 240, 0.5)',
+                        handleStyle: { color: '#f97316', shadowBlur: 3, shadowColor: 'rgba(0,0,0,0.2)' },
+                        handleSize: '100%',
+                        brushSelect: false
+                    }, 
+                    { 
+                        type: 'slider', 
+                        yAxisIndex:[0], 
+                        left: '5', 
+                        width: 25,
+                        fillerColor: 'rgba(37, 99, 235, 0.1)',
+                        handleSize: '100%',
+                        brushSelect: false
+                    }, 
+                    { 
+                        type: 'slider', 
+                        yAxisIndex:[1], 
+                        right: '5', 
+                        width: 25,
+                        fillerColor: 'rgba(194, 65, 12, 0.1)',
+                        handleSize: '100%',
+                        brushSelect: false
+                    }, 
+                    { type: 'inside', xAxisIndex:[0] }
+                ],
                 xAxis: { type: 'category', data: data.x, boundaryGap: false, axisLabel: { fontSize: 8, color: '#cbd5e1' } },
                 yAxis: [{ type: 'value', name: '期指', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }, { type: 'value', name: '選', position: 'right', scale: true, axisLabel: { fontSize: 8, color: '#c2410c' } }],
                 series: [
                     { name: '期貨指數', type: 'line', yAxisIndex: 0, data: data.y1, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#2563eb' }, areaStyle: { color: 'rgba(37, 99, 235, 0.1)' }, markArea: { silent: true, data: markAreas }, markPoint: markExtrema, connectNulls: false }, 
-                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: 0.45, showSymbol: false, lineStyle: { width: 1.5, color: '#059669' }, markPoint: markExtrema, connectNulls: false }, 
-                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: 0.45, showSymbol: false, lineStyle: { width: 1.5, color: '#d97706', type: 'dashed' }, markPoint: markExtrema, connectNulls: false },
-                    { name: '週三平均', type: 'line', yAxisIndex: 1, data: data.yAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#8b5cf6', type: 'solid' }, markPoint: markExtrema, connectNulls: false },
-                    { name: '週五平均', type: 'line', yAxisIndex: 1, data: data.yFriAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#ec4899', type: 'solid' }, markPoint: markExtrema, connectNulls: false }
+                    { name: '週三選', type: 'line', yAxisIndex: 1, data: data.y2a, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#ef4444' }, markPoint: markExtrema, connectNulls: false }, 
+                    { name: '週五選', type: 'line', yAxisIndex: 1, data: data.y2b, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#10b981' }, markPoint: markExtrema, connectNulls: false },
+                    { name: '週三平均', type: 'line', yAxisIndex: 1, data: data.yAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#ef4444', type: 'dashed' }, markPoint: markExtrema, connectNulls: false },
+                    { name: '週五平均', type: 'line', yAxisIndex: 1, data: data.yFriAvg, smooth: 0.45, showSymbol: false, lineStyle: { width: 2, color: '#10b981', type: 'dashed' }, markPoint: markExtrema, connectNulls: false }
                 ]
             };
             chart.setOption(opt);
