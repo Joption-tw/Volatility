@@ -3,11 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歐大百點震幅統計表 - V6.0.4</title>
+    <title>歐大百點震幅統計表 - V6.0.7</title>
     <!-- 載入必要 CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/echarts/5.4.3/echarts.min.js"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- 截圖專用函式庫 -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
         body { background-color: #f8fafc; color: #1e293b; font-family: sans-serif; overflow-x: hidden; }
         #main-chart { height: 440px; width: 100%; } 
@@ -101,10 +103,13 @@
         
         .excel-font-lg { font-size: 13px; font-weight: 900; letter-spacing: -0.025em; }
         .excel-font-sm { font-size: 11px; font-weight: 700; font-family: ui-monospace, monospace; letter-spacing: -0.05em; }
+
+        /* 截圖時排除的樣式 */
+        .no-screenshot { }
     </style>
 </head>
 <body class="p-2 md:p-4">
-    <div class="max-w-[1600px] mx-auto space-y-2">
+    <div id="capture-area" class="max-w-[1600px] mx-auto space-y-2 p-1">
         <!-- Header -->
         <header class="flex items-center justify-between glass-card px-4 py-1.5 shadow-sm">
             <div class="flex items-center gap-2">
@@ -113,7 +118,7 @@
                 <div>
                     <div class="flex items-center gap-1.5">
                         <h1 class="text-base font-black text-slate-800 leading-none">歐大百點震幅統計表</h1>
-                        <span class="version-badge">V6.0.4</span>
+                        <span class="version-badge">V6.0.7</span>
                         <span id="current-time-display" class="text-[10px] font-bold text-slate-400 font-mono tracking-tight ml-1"></span>
                     </div>
                 </div>
@@ -124,14 +129,19 @@
                     <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
                     <span id="data-count" class="text-slate-500">同步就緒</span>
                 </div>
-                <button id="refresh-btn" class="flex items-center gap-1.5 px-3 py-1 bg-orange-600 hover:bg-orange-700 active:scale-90 text-white rounded-md font-black text-[11px] shadow-sm transition-all duration-75">
-                    <i data-lucide="refresh-ccw" class="w-3 h-3"></i> 同步
-                </button>
+                <div class="flex gap-1 no-screenshot">
+                    <button id="screenshot-btn" class="flex items-center gap-1.5 px-3 py-1 bg-slate-800 hover:bg-slate-900 active:scale-90 text-white rounded-md font-black text-[11px] shadow-sm transition-all duration-75">
+                        <i data-lucide="camera" class="w-3 h-3"></i> 截圖
+                    </button>
+                    <button id="refresh-btn" class="flex items-center gap-1.5 px-3 py-1 bg-orange-600 hover:bg-orange-700 active:scale-90 text-white rounded-md font-black text-[11px] shadow-sm transition-all duration-75">
+                        <i data-lucide="refresh-ccw" class="w-3 h-3"></i> 同步
+                    </button>
+                </div>
             </div>
         </header>
 
         <!-- Session Switcher -->
-        <div class="glass-card p-2 shadow-sm">
+        <div class="glass-card p-2 shadow-sm no-screenshot">
             <div id="session-switcher" class="grid grid-cols-5 md:grid-cols-10 gap-1 w-full">
                 <!-- JS 產生按鈕 -->
             </div>
@@ -231,7 +241,7 @@
     </div>
 
     <!-- Modal -->
-    <div id="detailed-modal" class="modal-overlay">
+    <div id="detailed-modal" class="modal-overlay no-screenshot">
         <div class="modal-container">
             <div class="px-5 py-3 border-b border-slate-100 flex items-center justify-between bg-slate-50/80 backdrop-blur-sm">
                 <div class="flex items-center gap-2">
@@ -532,7 +542,7 @@
             if (type === '50pt' || type === '100pt') {
                 const threshold = type === '50pt' ? 50 : 100;
                 const swingData = type === '50pt' ? stats.s50 : stats.s100;
-                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節 analysis`;
+                document.getElementById('modal-title').innerText = `${range.label} - ${threshold}pt 波段細節分析`;
                 summaryBar.classList.remove('hidden');
                 summaryBar.innerHTML = `<div class="flex-1 text-red-400">上漲累積: ${swingData.upCount}x/${swingData.upSum.toFixed(0)}pt</div><div class="flex-1 text-emerald-400 pl-3">下跌累積: ${swingData.downCount}x/${swingData.downSum.toFixed(0)}pt</div><div class="flex-1 text-orange-400 text-right">該盤合計: ${(swingData.upSum + swingData.downSum).toFixed(0)} pt</div>`;
                 let html = `<div class="grid grid-cols-2 lg:grid-cols-4 gap-0.5">`;
@@ -727,6 +737,63 @@
             finally { setTimeout(() => { overlay.style.opacity = '0'; setTimeout(() => overlay.classList.add('hidden'), 300); }, 500); }
         }
 
+        /**
+         * 一鍵截圖功能實作
+         */
+        async function takeScreenshot() {
+            const btn = document.getElementById('screenshot-btn');
+            const originalText = btn.innerHTML;
+            
+            // 顯示處理中狀態
+            btn.disabled = true;
+            btn.innerHTML = '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i> 處理中...';
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            // 稍微延遲以確保 UI 更新
+            await new Promise(r => setTimeout(r, 100));
+
+            const captureArea = document.getElementById('capture-area');
+            
+            // 截圖前暫時隱藏不必要的按鈕元素
+            const actionButtons = document.querySelectorAll('.no-screenshot');
+            actionButtons.forEach(el => el.style.visibility = 'hidden');
+
+            try {
+                const canvas = await html2canvas(captureArea, {
+                    useCORS: true,
+                    allowTaint: true,
+                    backgroundColor: '#f8fafc',
+                    scale: 2, // 高解析度
+                    logging: false
+                });
+
+                const dataUrl = canvas.toDataURL('image/png');
+                const link = document.createElement('a');
+                
+                // 產生 歐大統計表_年月日時分秒 的命名格式
+                const now = new Date();
+                const Y = now.getFullYear();
+                const M = String(now.getMonth() + 1).padStart(2, '0');
+                const D = String(now.getDate()).padStart(2, '0');
+                const h = String(now.getHours()).padStart(2, '0');
+                const m = String(now.getMinutes()).padStart(2, '0');
+                const s = String(now.getSeconds()).padStart(2, '0');
+                const timestamp = `${Y}${M}${D}_${h}${m}${s}`;
+                
+                link.download = `歐大統計表_${timestamp}.png`;
+                link.href = dataUrl;
+                link.click();
+            } catch (err) {
+                console.error("截圖發生錯誤:", err);
+            } finally {
+                // 恢復顯示
+                actionButtons.forEach(el => el.style.visibility = 'visible');
+                btn.disabled = false;
+                btn.innerHTML = originalText;
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            }
+        }
+
         window.onload = () => {
             if (typeof lucide !== 'undefined') lucide.createIcons();
             updateLiveTime();
@@ -739,6 +806,7 @@
             document.getElementById('btn-close-modal').onclick = () => document.getElementById('detailed-modal').classList.remove('active');
             document.getElementById('btn-modal-ok').onclick = () => document.getElementById('detailed-modal').classList.remove('active');
             document.getElementById('refresh-btn').onclick = fetchData;
+            document.getElementById('screenshot-btn').onclick = takeScreenshot;
         };
         window.onresize = () => chart && chart.resize();
     </script>
